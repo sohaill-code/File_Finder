@@ -85,7 +85,7 @@ export default async function LandingPage() {
             <span className="font-bold text-gray-900 dark:text-white text-lg">FileFinder</span>
           </div>
           <Link
-            href="/api/auth/signin"
+            href="/dashboard"
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition-all shadow-md shadow-blue-500/20 active:scale-95"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -126,7 +126,7 @@ export default async function LandingPage() {
           {/* CTA buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20 animate-slide-up">
             <Link
-              href="/api/auth/signin"
+              href="/dashboard"
               id="hero-cta-btn"
               className="flex items-center gap-3 px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl transition-all shadow-xl shadow-blue-500/30 active:scale-95 text-base"
             >
@@ -193,7 +193,7 @@ export default async function LandingPage() {
                     ))}
                   </ul>
                   <Link
-                    href="/api/auth/signin"
+                    href="/dashboard"
                     className={`block w-full py-3 rounded-xl text-center text-sm font-bold transition-all active:scale-95
                       ${p.highlight ? "bg-white text-blue-700 hover:bg-blue-50 shadow-md" : "bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-500/20"}`}
                   >

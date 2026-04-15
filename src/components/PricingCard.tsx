@@ -51,8 +51,16 @@ export default function PricingCard({ currentPlan, isPro, currentSubscriptionId 
       }
 
       const RazorpayCheckout = (window as any).Razorpay;
+      const rzpKey = keyId ?? process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
+      
+      if (!rzpKey) {
+        toast("Razorpay integration is in preview mode (missing key)", "error");
+        setLoading(false);
+        return;
+      }
+
       const options = {
-        key: keyId ?? process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+        key: rzpKey,
         subscription_id: subscriptionId,
         name: "FileFinder",
         description: billing === "monthly" ? "Monthly Pro Plan – ₹20/month" : "Yearly Pro Plan – ₹200/year",

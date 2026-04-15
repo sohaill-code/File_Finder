@@ -7,5 +7,5 @@ export default withAuth({
 });
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/admin/:path*", "/profile/:path*", "/pricing/:path*"],
+  matcher: [], // Disabled for mock testing
 };

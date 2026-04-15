@@ -5,10 +5,12 @@ import { logAudit } from "@/lib/audit";
 import { NextRequest, NextResponse } from "next/server";
 import Razorpay from "razorpay";
 
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID!,
-  key_secret: process.env.RAZORPAY_KEY_SECRET!,
-});
+const razorpay = process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET 
+  ? new Razorpay({
+      key_id: process.env.RAZORPAY_KEY_ID,
+      key_secret: process.env.RAZORPAY_KEY_SECRET,
+    }) 
+  : null;
 
 const PLAN_IDS: Record<string, string> = {
   monthly: process.env.RAZORPAY_PLAN_ID_MONTHLY!,
@@ -33,6 +35,10 @@ export async function POST(req: NextRequest) {
   const amount = plan === "monthly" ? 2000 : 20000; // paise
 
   try {
+    if (!razorpay) {
+      return NextResponse.json({ error: "Razorpay is not configured (Preview Mode)" }, { status: 500 });
+    }
+
     // Create subscription in Razorpay
     const subscription = await (razorpay.subscriptions as any).create({
       plan_id: planId,
