@@ -32,11 +32,18 @@ html {
 body {
   background-color: var(--background);
   color: var(--foreground);
-  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
   font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
   line-height: 1.6;
   min-height: 100dvh;
   overflow-x: hidden;
+}
+
+.hero-bg {
+  background: radial-gradient(ellipse at top, #eff6ff 0%, #f8fafc 60%);
+}
+.dark .hero-bg {
+  background: radial-gradient(ellipse at top, #0f172a 0%, #09090b 60%);
 }
 
 /* ── Custom Utilities ────────────────────────────────────────────────────── */

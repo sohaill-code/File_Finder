@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useLang } from "@/contexts/LanguageContext";
 import { toast } from "@/components/Toast";
-import { useSession } from "next-auth/react";
 
 interface Color { id: string; name: string; hex: string; }
 
@@ -219,7 +218,7 @@ export default function PartyTable({ initialParties }: { initialParties: Party[]
                 <div key={p.id} className="relative pl-5">
                   <span className="absolute -left-[5px] top-1.5 w-2.5 h-2.5 rounded-full ring-4 ring-white dark:ring-zinc-950" style={{ backgroundColor: p.colorHex }}/>
                   <p className="text-xs font-semibold text-slate-900 dark:text-white leading-tight">{p.name}</p>
-                  <p className="text-[10px] text-slate-500 mt-0.5">Just now</p>
+                  <p className="text-[10px] text-slate-500 mt-0.5">{new Date(p.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}</p>
                 </div>
               ))}
             </div>

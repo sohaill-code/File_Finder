@@ -43,7 +43,7 @@ export default async function PricingPage() {
         <PricingCard
           currentPlan={user.plan}
           isPro={user.isPro}
-          currentSubscriptionId={user.subscriptionId ?? null}
+          currentSubscriptionId={(user as any).subscriptionId ?? null}
         />
 
         {/* Billing history */}

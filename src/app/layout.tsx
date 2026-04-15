@@ -23,6 +23,7 @@ export const metadata: Metadata = {
   keywords: ["file management", "party files", "Indian business", "SaaS"],
   authors: [{ name: "FileFinder" }],
   creator: "FileFinder",
+  metadataBase: new URL("https://filefinder.in"),
   openGraph: {
     type: "website",
     locale: "en_IN",

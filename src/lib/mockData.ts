@@ -31,5 +31,5 @@ export const MOCK_AUDIT_LOGS = [
 
 export const MOCK_PAYMENTS = [
   { id: "pay_1", amount: 20000, plan: "yearly", status: "active", createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 10).toISOString() },
-  { id: "pay_2", amount: 2000, plan: "monthly", status: "success", createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 40).toISOString() },
+  { id: "pay_2", amount: 2000, plan: "monthly", status: "active", createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 40).toISOString() },
 ];

@@ -59,6 +59,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
+  if (!session.user.isPro) {
+    const count = await prisma.partyFile.count({
+      where: { userId: session.user.id }
+    });
+    if (count >= 50) {
+      return NextResponse.json({ error: "Free plan limit reached. Upgrade to Pro." }, { status: 403 });
+    }
+  }
+
   const party = await prisma.partyFile.create({
     data: {
       userId: session.user.id,

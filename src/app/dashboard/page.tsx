@@ -29,7 +29,7 @@ export default async function DashboardPage() {
       });
     } else if (role === "MANAGER") {
       const team = await prisma.user.findMany({ where: { managerId: userId }, select: { id: true } });
-      const teamIds = [userId, ...team.map((u: any) => u.id)];
+      const teamIds = [userId, ...team.map((u: { id: string }) => u.id)];
       parties = await prisma.partyFile.findMany({
         where: { userId: { in: teamIds } },
         orderBy: { createdAt: "desc" },
@@ -66,7 +66,7 @@ export default async function DashboardPage() {
 
         {/* Client Table Component */}
         <PartyTable
-          initialParties={parties.map((p: any) => ({
+          initialParties={parties.map((p: { id: string; name: string; colorId: string; colorName: string; colorHex: string; notes: string | null; createdAt: Date | string; userId: string; user?: any }) => ({
             id: p.id,
             name: p.name,
             colorId: p.colorId,

@@ -12,14 +12,14 @@ export const metadata: Metadata = { title: "Profile" };
 export default async function ProfilePage() {
   const session = await getServerSession(authOptions);
 
-  let user: any = session?.user;
+  let user: { id: string; name?: string | null; email?: string | null; image?: string | null; role?: string; isPro?: boolean; subscriptionStatus?: string | null; currentPeriodEnd?: string | Date | null; plan?: string | null; _count?: { parties: number } } | null | undefined = session?.user as any;
 
   if (!user) {
     user = { ...MOCK_USER, currentPeriodEnd: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30).toISOString(), _count: { parties: 14 } };
   } else {
     user = await prisma.user.findUnique({
       where: { id: user.id },
-      select: { name: true, email: true, image: true, role: true, isPro: true, subscriptionStatus: true, currentPeriodEnd: true, plan: true, _count: { select: { parties: true } } },
+      select: { id: true, name: true, email: true, image: true, role: true, isPro: true, subscriptionStatus: true, currentPeriodEnd: true, plan: true, _count: { select: { parties: true } } },
     });
   }
 
@@ -59,8 +59,8 @@ export default async function ProfilePage() {
                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wide ${rc.color}`}>
                   {rc.label}
                 </span>
+                <p className="text-[11px] text-slate-500 dark:text-zinc-400 truncate font-medium">{user?.email}</p>
               </div>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5 truncate">{user?.email}</p>
             </div>
           </div>
 
@@ -93,7 +93,7 @@ export default async function ProfilePage() {
                   </div>
                   <div>
                     <p className="font-bold text-green-800 dark:text-green-300">Pro — Active</p>
-                    <p className="text-sm text-green-700 dark:text-green-400 capitalize">{user.plan} plan</p>
+                    <p className="text-sm text-green-700 dark:text-green-400 capitalize">{user?.plan} plan</p>
                   </div>
                 </div>
                 {renewalDate && (

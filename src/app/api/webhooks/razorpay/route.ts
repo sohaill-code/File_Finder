@@ -20,11 +20,12 @@ export async function POST(req: NextRequest) {
     .update(rawBody)
     .digest("hex");
 
+  const sigBuf = Buffer.from(signature, "hex");
+  const expBuf = Buffer.from(expectedSig, "hex");
+
   if (
-    !crypto.timingSafeEqual(
-      Buffer.from(signature, "hex"),
-      Buffer.from(expectedSig, "hex")
-    )
+    sigBuf.length !== expBuf.length ||
+    !crypto.timingSafeEqual(sigBuf, expBuf)
   ) {
     console.warn("[Razorpay Webhook] Invalid signature");
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
@@ -66,7 +67,6 @@ export async function POST(req: NextRequest) {
       const plan = existingPayment.plan;
 
       // Calculate next period end
-      const now = new Date();
       const periodEnd = new Date(chargedAt * 1000);
       if (plan === "monthly") {
         periodEnd.setMonth(periodEnd.getMonth() + 1);
@@ -138,6 +138,18 @@ export async function POST(req: NextRequest) {
           where: { subscriptionId: sub.id, status: "pending" },
           data: { status: "active" },
         });
+
+        const user = await prisma.user.findFirst({
+          where: { subscriptionId: sub.id },
+        });
+        if (user) {
+          await logAudit({
+            userId: user.id,
+            action: "SUBSCRIBE",
+            target: "Payment",
+            metadata: { subscriptionId: sub.id },
+          });
+        }
       }
     }
 

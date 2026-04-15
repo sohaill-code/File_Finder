@@ -46,7 +46,7 @@ export default async function AdminPage() {
         orderBy: { name: "asc" },
       });
       const team = await prisma.user.findMany({ where: { managerId: userId }, select: { id: true } });
-      const teamIds = [userId, ...team.map((u: any) => u.id)];
+      const teamIds = [userId, ...team.map((u: { id: string }) => u.id)];
       logs = await prisma.auditLog.findMany({ where: { userId: { in: teamIds } }, orderBy: { createdAt: "desc" }, take: 100, include: { user: { select: { name: true, email: true, image: true } } } });
       totalParties = await prisma.partyFile.count({ where: { userId } });
     }
@@ -83,7 +83,7 @@ export default async function AdminPage() {
 
         {/* User hierarchy */}
         <UserHierarchyPanel
-          users={users.map((u: any) => ({
+          users={users.map((u: { id: string; name: string | null; email: string | null; image: string | null; role: string; isPro: boolean; subscriptionStatus?: string | null; plan: string | null; managerId: string | null; manager?: any; _count: any; }) => ({
             id: u.id, name: u.name, email: u.email, image: u.image, role: u.role, isPro: u.isPro, subscriptionStatus: u.subscriptionStatus, plan: u.plan, managerId: u.managerId, manager: u.manager, _count: u._count,
           }))}
           currentUserId={user.id} 
@@ -92,7 +92,7 @@ export default async function AdminPage() {
 
         {/* Audit logs */}
         <AuditLogTable
-          logs={logs.map((l: any) => ({
+          logs={logs.map((l: { id: string; action: string; target: string | null; targetId: string | null; metadata: string | null; ip?: string | null; createdAt: Date | string; user: any; }) => ({
             id: l.id, action: l.action, target: l.target, targetId: l.targetId, metadata: l.metadata, ip: l.ip, createdAt: typeof l.createdAt === "string" ? l.createdAt : l.createdAt.toISOString(), user: l.user,
           }))}
         />
