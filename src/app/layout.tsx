@@ -4,8 +4,6 @@ import "./globals.css";
 import SessionProvider from "@/components/SessionProvider";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import Toast from "@/components/Toast";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -36,12 +34,11 @@ export const metadata: Metadata = {
 export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const session = await getServerSession(authOptions);
 
   return (
     <html lang="en" className={`${inter.variable}`} suppressHydrationWarning>
       <body className="min-h-dvh flex flex-col bg-background text-foreground">
-        <SessionProvider session={session}>
+        <SessionProvider>
           <LanguageProvider>
             {children}
             <Toast />
