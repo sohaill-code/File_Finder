@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   creator: "FileFinder",
   metadataBase: new URL("https://filefinder.in"),
   verification: {
-    google: "google-site-verification-id-here", // Replace with your actual ID
+    google: "v5FZrMlMRynLXUA3rxsF_cLpiNdw5LF6n3DpyYWwGyE",
   },
   openGraph: {
     type: "website",
