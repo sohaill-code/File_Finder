@@ -72,20 +72,26 @@ export default async function LandingPage() {
       {/* ── Nav ──────────────────────────────────────────────────────────── */}
       <header className="sticky top-0 z-40 bg-white bg-opacity-70 dark:bg-gray-950/80 backdrop-blur-md border-b border-gray-200/60 dark:border-gray-800/60">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-blue-500 flex items-center justify-center shadow-md shadow-blue-500/30">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
-                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
-              </svg>
-            </div>
-            <span className="font-bold text-gray-900 dark:text-white text-lg">FileFinder</span>
+          <div className="flex items-center gap-2">
+            <Link href="/" className="flex items-center gap-2.5">
+              <img src="/logo.png" alt="FileFinder Logo" className="w-8 h-8 object-contain" />
+              <span className="font-bold text-gray-900 dark:text-white text-lg tracking-tight">FileFinder</span>
+            </Link>
           </div>
-          <Link
-            href="/dashboard"
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition-all shadow-md shadow-blue-500/20 active:scale-95"
-          >
-            Go to Dashboard
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/dashboard"
+              className="hidden sm:block text-sm font-semibold text-gray-600 dark:text-gray-400 hover:text-blue-600 transition-colors"
+            >
+              Login
+            </Link>
+            <Link
+              href="/dashboard"
+              className="flex items-center gap-2 px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition-all shadow-md shadow-blue-500/20 active:scale-95"
+            >
+              Get Started
+            </Link>
+          </div>
         </div>
       </header>
 
@@ -95,7 +101,7 @@ export default async function LandingPage() {
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 rounded-full text-blue-700 dark:text-blue-400 text-sm font-semibold mb-8 animate-fade-in">
             <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"/>
-            Built for Indian Businesses
+            Intelligent File Management
           </div>
 
           {/* Headline */}
@@ -109,8 +115,7 @@ export default async function LandingPage() {
 
           <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mb-10 animate-fade-in leading-relaxed">
             Color-code party files, manage teams with role-based access, and never
-            lose track of a physical folder again. Multi-language, Razorpay-powered,
-            Google-authenticated.
+            lose track of a physical folder again. Professional management for physical documentation.
           </p>
 
           {/* CTA buttons */}
@@ -119,7 +124,7 @@ export default async function LandingPage() {
               href="/dashboard"
               className="flex items-center gap-3 px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl transition-all shadow-xl shadow-blue-500/30 active:scale-95 text-base"
             >
-              Get Started for Demo
+              Get Started
             </Link>
             <a
               href="#features"
@@ -190,8 +195,14 @@ export default async function LandingPage() {
       </main>
 
       {/* ── Footer ───────────────────────────────────────────────────────── */}
-      <footer className="border-t border-gray-200 dark:border-gray-800 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
-        <p>© {new Date().getFullYear()} FileFinder. Built with ❤️ for Indian Businesses.</p>
+      <footer className="border-t border-gray-200 dark:border-gray-800 py-12">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col items-center gap-6">
+          <div className="flex items-center gap-2.5 opacity-60 grayscale hover:grayscale-0 transition-all duration-300">
+             <img src="/logo.png" alt="FileFinder Logo" className="w-6 h-6 object-contain" />
+             <span className="font-bold text-gray-900 dark:text-white text-base">FileFinder</span>
+          </div>
+          <p className="text-sm text-gray-500 dark:text-gray-400">© {new Date().getFullYear()} FileFinder. Intelligent Physical File Management.</p>
+        </div>
       </footer>
     </div>
   );

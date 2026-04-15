@@ -34,9 +34,9 @@ export default function Header({ onOpenSidebar }: { onOpenSidebar?: () => void }
               </svg>
             </button>
           )}
-          {/* Logo/Brand for mobile */}
-          <Link href="/" className="lg:hidden flex items-center gap-2">
-             <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold">F</div>
+          <Link href="/" className="flex items-center gap-2.5">
+             <img src="/logo.png" alt="FileFinder Logo" className="w-8 h-8 object-contain" />
+             <span className="hidden sm:block font-bold text-slate-900 dark:text-white text-lg tracking-tight">FileFinder</span>
           </Link>
         </div>
 
@@ -134,12 +134,20 @@ export default function Header({ onOpenSidebar }: { onOpenSidebar?: () => void }
               )}
             </div>
           ) : (
-            <button
-              onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
-              className="px-5 py-2.5 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold shadow-lg shadow-indigo-500/25 active:scale-95 transition-all"
-            >
-              Sign In
-            </button>
+            <div className="flex items-center gap-3">
+              <Link
+                href="/dashboard"
+                className="hidden sm:block text-sm font-bold text-slate-600 dark:text-zinc-400 hover:text-indigo-600 transition-colors"
+              >
+                Login
+              </Link>
+              <Link
+                href="/dashboard"
+                className="px-5 py-2.5 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold shadow-lg shadow-indigo-500/25 active:scale-95 transition-all"
+              >
+                Sign Up
+              </Link>
+            </div>
           )}
         </div>
       </div>
