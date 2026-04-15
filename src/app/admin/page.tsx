@@ -1,56 +1,18 @@
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
 import DashboardLayout from "@/components/DashboardLayout";
 import UserHierarchyPanel from "@/components/UserHierarchyPanel";
 import AuditLogTable from "@/components/AuditLogTable";
 import { MOCK_USER, MOCK_USERS, MOCK_AUDIT_LOGS } from "@/lib/mockData";
-import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Admin Panel" };
 
 export default async function AdminPage() {
-  const session = await getServerSession(authOptions);
-
-  let user = session?.user;
-  let users = [];
-  let logs = [];
-  let totalParties = 0;
-  let totalPro: number | null = null;
-
-  if (!user) {
-    // 🔥 Mock Demo Fallback
-    user = MOCK_USER;
-    users = MOCK_USERS;
-    logs = MOCK_AUDIT_LOGS;
-    totalParties = 25;
-    totalPro = 1;
-  } else {
-    // 🗄️ Real Data
-    const { id: userId, role } = user;
-    if (role === "STAFF") redirect("/dashboard");
-
-    if (role === "BOSS") {
-      users = await prisma.user.findMany({
-        select: { id: true, name: true, email: true, image: true, role: true, isPro: true, subscriptionStatus: true, plan: true, managerId: true, manager: { select: { name: true } }, _count: { select: { parties: true, managedUsers: true } } },
-        orderBy: { name: "asc" },
-      });
-      logs = await prisma.auditLog.findMany({ orderBy: { createdAt: "desc" }, take: 100, include: { user: { select: { name: true, email: true, image: true } } } });
-      totalPro = await prisma.user.count({ where: { isPro: true } });
-      totalParties = await prisma.partyFile.count();
-    } else {
-      users = await prisma.user.findMany({
-        where: { OR: [{ id: userId }, { managerId: userId }] },
-        select: { id: true, name: true, email: true, image: true, role: true, isPro: true, subscriptionStatus: true, plan: true, managerId: true, _count: { select: { parties: true } } },
-        orderBy: { name: "asc" },
-      });
-      const team = await prisma.user.findMany({ where: { managerId: userId }, select: { id: true } });
-      const teamIds = [userId, ...team.map((u: { id: string }) => u.id)];
-      logs = await prisma.auditLog.findMany({ where: { userId: { in: teamIds } }, orderBy: { createdAt: "desc" }, take: 100, include: { user: { select: { name: true, email: true, image: true } } } });
-      totalParties = await prisma.partyFile.count({ where: { userId } });
-    }
-  }
+  // 🔥 Fully Mocked for Demo
+  const user = MOCK_USER;
+  const users = MOCK_USERS;
+  const logs = MOCK_AUDIT_LOGS;
+  const totalParties = 25;
+  const totalPro = 1;
 
   return (
     <DashboardLayout role={user.role}>
@@ -59,7 +21,7 @@ export default async function AdminPage() {
         <div>
           <h1 className="text-2xl font-extrabold text-gray-900 dark:text-white tracking-tight">Admin Panel</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-            {user.role === "BOSS" ? "Full organizational overview" : "Managing your team"}
+            {user.role === "BOSS" ? "Full organizational overview (Demo)" : "Managing your team (Demo)"}
           </p>
         </div>
 
@@ -83,7 +45,7 @@ export default async function AdminPage() {
 
         {/* User hierarchy */}
         <UserHierarchyPanel
-          users={users.map((u: { id: string; name: string | null; email: string | null; image: string | null; role: string; isPro: boolean; subscriptionStatus?: string | null; plan: string | null; managerId: string | null; manager?: any; _count: any; }) => ({
+          users={users.map((u: any) => ({
             id: u.id, name: u.name, email: u.email, image: u.image, role: u.role, isPro: u.isPro, subscriptionStatus: u.subscriptionStatus, plan: u.plan, managerId: u.managerId, manager: u.manager, _count: u._count,
           }))}
           currentUserId={user.id} 
@@ -92,7 +54,7 @@ export default async function AdminPage() {
 
         {/* Audit logs */}
         <AuditLogTable
-          logs={logs.map((l: { id: string; action: string; target: string | null; targetId: string | null; metadata: string | null; ip?: string | null; createdAt: Date | string; user: any; }) => ({
+          logs={logs.map((l: any) => ({
             id: l.id, action: l.action, target: l.target, targetId: l.targetId, metadata: l.metadata, ip: l.ip, createdAt: typeof l.createdAt === "string" ? l.createdAt : l.createdAt.toISOString(), user: l.user,
           }))}
         />

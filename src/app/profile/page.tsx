@@ -1,6 +1,3 @@
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
 import DashboardLayout from "@/components/DashboardLayout";
 import Image from "next/image";
 import Link from "next/link";
@@ -10,21 +7,11 @@ import type { Metadata } from "next";
 export const metadata: Metadata = { title: "Profile" };
 
 export default async function ProfilePage() {
-  const session = await getServerSession(authOptions);
+  // 🔥 Fully Mocked for Demo
+  const user = { ...MOCK_USER, currentPeriodEnd: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30).toISOString(), _count: { parties: 14 } };
 
-  let user: { id: string; name?: string | null; email?: string | null; image?: string | null; role?: string; isPro?: boolean; subscriptionStatus?: string | null; currentPeriodEnd?: string | Date | null; plan?: string | null; _count?: { parties: number } } | null | undefined = session?.user as any;
-
-  if (!user) {
-    user = { ...MOCK_USER, currentPeriodEnd: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30).toISOString(), _count: { parties: 14 } };
-  } else {
-    user = await prisma.user.findUnique({
-      where: { id: user.id },
-      select: { id: true, name: true, email: true, image: true, role: true, isPro: true, subscriptionStatus: true, currentPeriodEnd: true, plan: true, _count: { select: { parties: true } } },
-    });
-  }
-
-  const isActive = user?.isPro && (user.subscriptionStatus === "active");
-  const renewalDate = user?.currentPeriodEnd
+  const isActive = user.isPro && (user.subscriptionStatus === "active");
+  const renewalDate = user.currentPeriodEnd
     ? new Date(user.currentPeriodEnd).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })
     : null;
 
@@ -33,10 +20,10 @@ export default async function ProfilePage() {
     MANAGER: { label: "Manager", color: "text-purple-600 bg-purple-100 dark:text-purple-400 dark:bg-purple-500/10" },
     STAFF: { label: "Staff", color: "text-blue-600 bg-blue-100 dark:text-blue-400 dark:bg-blue-500/10" },
   };
-  const rc = roleCfg[user?.role ?? "STAFF"];
+  const rc = roleCfg[user.role];
 
   return (
-    <DashboardLayout role={user?.role ?? "BOSS"}>
+    <DashboardLayout role={user.role}>
       <div className="max-w-2xl mx-auto w-full flex flex-col gap-6">
         <h1 className="text-2xl font-extrabold text-gray-900 dark:text-white tracking-tight">Your Profile</h1>
 
@@ -45,21 +32,21 @@ export default async function ProfilePage() {
           <div className="h-24 bg-gradient-to-r from-blue-600 to-purple-600"/>
           <div className="px-6 pb-6 -mt-12 flex flex-col sm:flex-row sm:items-end gap-4">
             <div className="ring-4 ring-white dark:ring-gray-900 rounded-full overflow-hidden w-20 h-20 shrink-0">
-              {user?.image ? (
+              {user.image ? (
                 <Image src={user.image} alt={user.name ?? ""} width={80} height={80} className="w-full h-full object-cover"/>
               ) : (
                 <div className="w-20 h-20 bg-blue-600 flex items-center justify-center text-white text-2xl font-bold">
-                  {user?.name?.[0] ?? "?"}
+                  {user.name?.[0] ?? "?"}
                 </div>
               )}
             </div>
             <div className="flex-1 min-w-0 pb-1">
               <div className="flex flex-wrap items-center gap-2">
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white truncate">{user?.name ?? "Unknown"}</h2>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white truncate">{user.name ?? "Unknown"}</h2>
                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wide ${rc.color}`}>
                   {rc.label}
                 </span>
-                <p className="text-[11px] text-slate-500 dark:text-zinc-400 truncate font-medium">{user?.email}</p>
+                <p className="text-[11px] text-slate-500 dark:text-zinc-400 truncate font-medium">{user.email}</p>
               </div>
             </div>
           </div>
@@ -68,12 +55,12 @@ export default async function ProfilePage() {
           <div className="px-6 pb-6 grid grid-cols-2 gap-4">
             <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4">
               <p className="text-xs text-gray-500 uppercase tracking-wide font-semibold mb-1">Total Files</p>
-              <p className="text-3xl font-extrabold text-gray-900 dark:text-white tabular-nums">{user?._count?.parties ?? 0}</p>
+              <p className="text-3xl font-extrabold text-gray-900 dark:text-white tabular-nums">{user._count.parties}</p>
             </div>
             <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4">
               <p className="text-xs text-gray-500 uppercase tracking-wide font-semibold mb-1">Account Type</p>
-              <p className={`text-lg font-bold ${user?.isPro ? "gradient-text" : "text-gray-500"}`}>
-                {user?.isPro ? "Pro ⚡" : "Free"}
+              <p className={`text-lg font-bold ${user.isPro ? "gradient-text" : "text-gray-500"}`}>
+                {user.isPro ? "Pro ⚡" : "Free"}
               </p>
             </div>
           </div>
@@ -93,7 +80,7 @@ export default async function ProfilePage() {
                   </div>
                   <div>
                     <p className="font-bold text-green-800 dark:text-green-300">Pro — Active</p>
-                    <p className="text-sm text-green-700 dark:text-green-400 capitalize">{user?.plan} plan</p>
+                    <p className="text-sm text-green-700 dark:text-green-400 capitalize">{user.plan} plan</p>
                   </div>
                 </div>
                 {renewalDate && (
