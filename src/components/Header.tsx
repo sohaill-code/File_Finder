@@ -4,20 +4,16 @@ import { useLang } from "@/contexts/LanguageContext";
 import { LANGUAGES, Language } from "@/lib/i18n";
 import { useState } from "react";
 import Link from "next/link";
-
-// ── Demo user — no auth required ──────────────────────────────────────────────
-const DEMO_USER = {
-  name: "Demo Boss",
-  email: "demo@filefinder.in",
-  image: null as string | null,
-  isPro: true,
-  role: "BOSS",
-};
+import { useSession, signIn, signOut } from "next-auth/react";
+import Image from "next/image";
 
 export default function Header({ onOpenSidebar }: { onOpenSidebar?: () => void }) {
   const { lang, setLang } = useLang();
+  const { data: session, status } = useSession();
   const [langOpen, setLangOpen]       = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+
+  const isLoading = status === "loading";
 
   return (
     <header className="sticky top-0 z-30 bg-white/90 dark:bg-zinc-950/90 backdrop-blur-md border-b border-slate-100 dark:border-zinc-800/80">
@@ -38,11 +34,10 @@ export default function Header({ onOpenSidebar }: { onOpenSidebar?: () => void }
               </svg>
             </button>
           )}
-          {/* Demo badge */}
-          <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-500/20">
-            <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
-            <span className="text-[10px] font-extrabold text-indigo-600 dark:text-indigo-400 tracking-widest uppercase">Demo Sandbox</span>
-          </div>
+          {/* Logo/Brand for mobile */}
+          <Link href="/" className="lg:hidden flex items-center gap-2">
+             <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold">F</div>
+          </Link>
         </div>
 
         {/* ── Right ────────────────────────────────────────── */}
@@ -86,16 +81,66 @@ export default function Header({ onOpenSidebar }: { onOpenSidebar?: () => void }
 
           <div className="h-5 w-px bg-slate-200 dark:bg-zinc-800"/>
 
-          {/* Dashboard Link */}
-          <Link
-            href="/dashboard"
-            className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-indigo-600 hover:bg-slate-900 text-white text-sm font-bold shadow-lg shadow-indigo-500/25 active:scale-95 transition-all"
-          >
-            <span>Enter Dashboard</span>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M5 12h14M12 5l7 7-7 7"/>
-            </svg>
-          </Link>
+          {/* Profile Section */}
+          {isLoading ? (
+            <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-zinc-800 animate-pulse" />
+          ) : session ? (
+            <div className="relative">
+              <button
+                onClick={() => setProfileOpen(!profileOpen)}
+                className="flex items-center gap-2.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-full active:scale-95 transition-transform"
+              >
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-br from-indigo-600 to-blue-500 overflow-hidden flex items-center justify-center text-white text-xs font-extrabold shadow-md relative">
+                  {session.user?.image ? (
+                    <Image src={session.user.image} alt="" fill className="object-cover" />
+                  ) : (
+                    session.user?.name?.[0] ?? "U"
+                  )}
+                </div>
+                <span className="hidden sm:block text-sm font-bold text-slate-700 dark:text-zinc-200">{session.user?.name?.split(" ")[0]}</span>
+              </button>
+
+              {profileOpen && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setProfileOpen(false)}/>
+                  <div className="absolute top-full right-0 mt-3 w-64 bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-800 shadow-xl p-4 z-50">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-11 h-11 rounded-full bg-gradient-to-br from-indigo-600 to-blue-500 overflow-hidden flex items-center justify-center text-white text-sm font-extrabold shrink-0 shadow-sm relative">
+                        {session.user?.image ? <Image src={session.user.image} alt="" fill className="object-cover" /> : session.user?.name?.[0]}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold text-slate-900 dark:text-white truncate">{session.user?.name}</p>
+                        <p className="text-[11px] text-slate-500 dark:text-zinc-400 truncate">{session.user?.email}</p>
+                      </div>
+                    </div>
+                    <hr className="border-slate-100 dark:border-zinc-800 my-2"/>
+                    <Link
+                      href="/profile"
+                      className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-semibold text-slate-600 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors"
+                      onClick={() => setProfileOpen(false)}
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a6 6 0 0 1 12 0v2"/></svg>
+                      My Profile
+                    </Link>
+                    <button
+                      onClick={() => signOut({ callbackUrl: "/" })}
+                      className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-semibold text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 dark:text-red-400 transition-colors"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                      Sign Out
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          ) : (
+            <button
+              onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+              className="px-5 py-2.5 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold shadow-lg shadow-indigo-500/25 active:scale-95 transition-all"
+            >
+              Sign In
+            </button>
+          )}
         </div>
       </div>
     </header>

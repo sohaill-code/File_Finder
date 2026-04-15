@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-// import SessionProvider from "@/components/SessionProvider"; // Removed for Vercel demo
+import SessionProvider from "@/components/SessionProvider";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import Toast from "@/components/Toast";
 
@@ -41,10 +41,12 @@ export default async function RootLayout({
   return (
     <html lang="en" className={`${inter.variable}`} suppressHydrationWarning>
       <body className="min-h-dvh flex flex-col bg-background text-foreground">
-        <LanguageProvider>
-          {children}
-          <Toast />
-        </LanguageProvider>
+        <SessionProvider>
+          <LanguageProvider>
+            {children}
+            <Toast />
+          </LanguageProvider>
+        </SessionProvider>
       </body>
     </html>
   );

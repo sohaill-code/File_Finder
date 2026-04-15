@@ -1,14 +1,30 @@
 import DashboardLayout from "@/components/DashboardLayout";
+import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { MOCK_USER } from "@/lib/mockData";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Profile" };
 
 export default async function ProfilePage() {
-  // 🔥 Fully Mocked for Demo
-  const user = { ...MOCK_USER, currentPeriodEnd: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30).toISOString(), _count: { parties: 14 } };
+  const session = await getServerSession(authOptions);
+
+  if (!session?.user) {
+    redirect("/");
+  }
+
+  // Fetch full user data from DB
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    include: { _count: { select: { parties: true } } },
+  });
+
+  if (!user) {
+    redirect("/");
+  }
 
   const isActive = user.isPro && (user.subscriptionStatus === "active");
   const renewalDate = user.currentPeriodEnd
@@ -20,7 +36,7 @@ export default async function ProfilePage() {
     MANAGER: { label: "Manager", color: "text-purple-600 bg-purple-100 dark:text-purple-400 dark:bg-purple-500/10" },
     STAFF: { label: "Staff", color: "text-blue-600 bg-blue-100 dark:text-blue-400 dark:bg-blue-500/10" },
   };
-  const rc = roleCfg[user.role];
+  const rc = roleCfg[user.role] ?? roleCfg.STAFF;
 
   return (
     <DashboardLayout role={user.role}>

@@ -1,23 +1,38 @@
 import DashboardLayout from "@/components/DashboardLayout";
 import PartyTable from "@/components/PartyTable";
-import { MOCK_PARTIES } from "@/lib/mockData";
+import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
-// ─── Hardcoded Demo User (no auth required) ─────────────────────────────────
-const DEMO_USER = {
-  id: "demo_boss",
-  name: "Demo Boss",
-  email: "demo@filefinder.in",
-  image: null,
-  role: "BOSS",
-  isPro: true,
-};
-
 export default async function DashboardPage() {
-  const user = DEMO_USER;
-  const parties = MOCK_PARTIES;
+  const session = await getServerSession(authOptions);
+
+  if (!session?.user) {
+    redirect("/");
+  }
+
+  // Fetch full user for role
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { id: true, name: true, role: true, isPro: true },
+  });
+
+  if (!user) {
+    redirect("/");
+  }
+
+  // Fetch party files for this organization
+  // If BOSS: see everything. If MANAGER: see theirs + their staff. If STAFF: see only theirs.
+  // For now, simplicity: see all for BOSS/MANAGER, theirs for STAFF.
+  const parties = await prisma.partyFile.findMany({
+    where: user.role === "BOSS" ? {} : { userId: user.id },
+    include: { user: { select: { name: true, email: true } } },
+    orderBy: { createdAt: "desc" },
+  });
 
   return (
     <DashboardLayout role={user.role}>
@@ -26,25 +41,27 @@ export default async function DashboardPage() {
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
-              Welcome back, {user.name.split(" ")[0]} 👋
+              Welcome back, {user.name?.split(" ")[0] ?? "User"} 👋
             </h1>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
               You're viewing all party files across your organization.
             </p>
           </div>
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20">
-            <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
-            <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">Demo Mode</span>
-          </div>
+          {user.isPro && (
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20">
+              <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
+              <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">Pro Account</span>
+            </div>
+          )}
         </div>
 
         {/* Stats row */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {[
             { label: "Total Files", value: parties.length, icon: "📁", color: "text-blue-600 bg-blue-50 dark:bg-blue-500/10" },
-            { label: "Active Clients", value: 8, icon: "🏢", color: "text-purple-600 bg-purple-50 dark:bg-purple-500/10" },
-            { label: "This Month", value: 3, icon: "📈", color: "text-green-600 bg-green-50 dark:bg-green-500/10" },
-            { label: "Pending Review", value: 2, icon: "⏳", color: "text-amber-600 bg-amber-50 dark:bg-amber-500/10" },
+            { label: "Active Clients", value: new Set(parties.map(p => p.name)).size, icon: "🏢", color: "text-purple-600 bg-purple-50 dark:bg-purple-500/10" },
+            { label: "This Month", value: parties.filter(p => new Date(p.createdAt).getMonth() === new Date().getMonth()).length, icon: "📈", color: "text-green-600 bg-green-50 dark:bg-green-500/10" },
+            { label: "Role", value: user.role, icon: "🔑", color: "text-amber-600 bg-amber-50 dark:bg-amber-500/10" },
           ].map((s) => (
             <div key={s.label} className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-5 shadow-sm hover:shadow-md transition-shadow">
               <div className="flex items-center justify-between mb-3">
@@ -65,7 +82,7 @@ export default async function DashboardPage() {
             colorName: p.colorName,
             colorHex: p.colorHex,
             notes: p.notes ?? null,
-            createdAt: typeof p.createdAt === "string" ? p.createdAt : (p.createdAt as Date).toISOString(),
+            createdAt: p.createdAt.toISOString(),
             userId: p.userId,
             user: p.user ? { name: p.user.name ?? null, email: p.user.email ?? null } : undefined,
           }))}

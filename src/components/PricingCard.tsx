@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useLang } from "@/contexts/LanguageContext";
 import { toast } from "@/components/Toast";
-// import { useSession } from "next-auth/react"; // Removed for demo
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
 interface PricingCardProps {
@@ -14,12 +14,16 @@ interface PricingCardProps {
 
 export default function PricingCard({ currentPlan, isPro, currentSubscriptionId }: PricingCardProps) {
   const { T } = useLang();
-  // const { data: session } = useSession(); // Removed for demo
+  const { data: session } = useSession();
   const router = useRouter();
   const [billing, setBilling] = useState<"monthly" | "yearly">("monthly");
   const [loading, setLoading] = useState(false);
 
   const handleSubscribe = async () => {
+    if (!session) {
+      toast("Please sign in to choose a plan", "error");
+      return;
+    }
     setLoading(true);
     setTimeout(() => {
       toast("Plan Selected! This is a demo mode.", "success");
