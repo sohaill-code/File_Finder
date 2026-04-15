@@ -1,6 +1,8 @@
 "use client";
 
-// Auth is bypassed for demo/sandbox mode — just render children directly.
-export default function SessionProvider({ children }: { children: React.ReactNode; session?: any }) {
+// import { SessionProvider as NextAuthProvider } from "next-auth/react";
+
+export default function SessionProvider({ children }: { children: React.ReactNode }) {
+  // return <NextAuthProvider>{children}</NextAuthProvider>;
   return <>{children}</>;
 }

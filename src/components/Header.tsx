@@ -86,50 +86,16 @@ export default function Header({ onOpenSidebar }: { onOpenSidebar?: () => void }
 
           <div className="h-5 w-px bg-slate-200 dark:bg-zinc-800"/>
 
-          {/* Profile dropdown */}
-          <div className="relative">
-            <button
-              onClick={() => setProfileOpen(!profileOpen)}
-              className="flex items-center gap-2.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-full active:scale-95 transition-transform"
-            >
-              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-br from-indigo-600 to-blue-500 flex items-center justify-center text-white text-xs font-extrabold shadow-md shadow-indigo-500/25 relative">
-                DB
-                {DEMO_USER.isPro && (
-                  <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-white dark:border-zinc-950 rounded-full"/>
-                )}
-              </div>
-              <span className="hidden sm:block text-sm font-bold text-slate-700 dark:text-zinc-200">{DEMO_USER.name}</span>
-            </button>
-
-            {profileOpen && (
-              <>
-                <div className="fixed inset-0 z-40" onClick={() => setProfileOpen(false)}/>
-                <div className="absolute top-full right-0 mt-3 w-64 bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-800 shadow-xl p-4 z-50">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-11 h-11 rounded-full bg-gradient-to-br from-indigo-600 to-blue-500 flex items-center justify-center text-white text-sm font-extrabold shrink-0 shadow-sm">
-                      DB
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold text-slate-900 dark:text-white">{DEMO_USER.name}</p>
-                      <p className="text-[11px] text-slate-500 dark:text-zinc-400">{DEMO_USER.email}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-green-50 dark:bg-green-500/10 border border-green-100 dark:border-green-500/20 mb-3">
-                    <span className="text-green-500">⚡</span>
-                    <p className="text-xs font-bold text-green-700 dark:text-green-400">Pro Plan — Active</p>
-                  </div>
-                  <hr className="border-slate-100 dark:border-zinc-800 my-2"/>
-                  <Link
-                    href="/"
-                    className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-600 dark:text-zinc-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 dark:hover:text-red-400 transition-colors"
-                  >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-                    Go to Home
-                  </Link>
-                </div>
-              </>
-            )}
-          </div>
+          {/* Dashboard Link */}
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-indigo-600 hover:bg-slate-900 text-white text-sm font-bold shadow-lg shadow-indigo-500/25 active:scale-95 transition-all"
+          >
+            <span>Enter Dashboard</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </Link>
         </div>
       </div>
     </header>

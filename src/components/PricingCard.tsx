@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useLang } from "@/contexts/LanguageContext";
 import { toast } from "@/components/Toast";
-import { useSession } from "next-auth/react";
+// import { useSession } from "next-auth/react"; // Removed for demo
 import { useRouter } from "next/navigation";
 
 interface PricingCardProps {
@@ -14,84 +14,18 @@ interface PricingCardProps {
 
 export default function PricingCard({ currentPlan, isPro, currentSubscriptionId }: PricingCardProps) {
   const { T } = useLang();
-  const { data: session } = useSession();
+  // const { data: session } = useSession(); // Removed for demo
   const router = useRouter();
   const [billing, setBilling] = useState<"monthly" | "yearly">("monthly");
   const [loading, setLoading] = useState(false);
 
   const handleSubscribe = async () => {
-    if (!session?.user) {
-      toast("Please sign in first", "error");
-      return;
-    }
     setLoading(true);
-    try {
-      const res = await fetch("/api/payments/create-subscription", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan: billing }),
-      });
-
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error ?? "Failed");
-      }
-
-      const { subscriptionId, keyId } = await res.json();
-
-      // Load Razorpay SDK if not present
-      if (!(window as any).Razorpay) {
-        await new Promise<void>((resolve, reject) => {
-          const script = document.createElement("script");
-          script.src = "https://checkout.razorpay.com/v1/checkout.js";
-          script.onload = () => resolve();
-          script.onerror = () => reject(new Error("Razorpay SDK failed to load"));
-          document.body.appendChild(script);
-        });
-      }
-
-      const RazorpayCheckout = (window as any).Razorpay;
-      const rzpKey = keyId ?? process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
-      
-      if (!rzpKey) {
-        toast("Razorpay integration is in preview mode (missing key)", "error");
-        setLoading(false);
-        return;
-      }
-
-      const options = {
-        key: rzpKey,
-        subscription_id: subscriptionId,
-        name: "FileFinder",
-        description: billing === "monthly" ? "Monthly Pro Plan – ₹20/month" : "Yearly Pro Plan – ₹200/year",
-        image: "/favicon.ico",
-        prefill: {
-          name: session.user.name ?? "",
-          email: session.user.email ?? "",
-        },
-        theme: { color: "#2563eb" },
-        handler: function (response: any) {
-          toast("Subscription activated! Welcome to Pro 🎉");
-          router.refresh();
-          router.push("/profile");
-        },
-        modal: {
-          ondismiss: function () {
-            setLoading(false);
-          },
-        },
-      };
-
-      const rzp = new RazorpayCheckout(options);
-      rzp.on("payment.failed", (resp: any) => {
-        toast("Payment failed: " + resp.error.description, "error");
-        setLoading(false);
-      });
-      rzp.open();
-    } catch (err: any) {
-      toast(err.message ?? T("error"), "error");
+    setTimeout(() => {
+      toast("Plan Selected! This is a demo mode.", "success");
       setLoading(false);
-    }
+      router.push("/dashboard");
+    }, 800);
   };
 
   const isCurrentMonthly = isPro && currentPlan === "monthly";

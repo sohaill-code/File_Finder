@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import SessionProvider from "@/components/SessionProvider";
+// import SessionProvider from "@/components/SessionProvider"; // Removed for Vercel demo
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import Toast from "@/components/Toast";
 
@@ -22,6 +22,9 @@ export const metadata: Metadata = {
   authors: [{ name: "FileFinder" }],
   creator: "FileFinder",
   metadataBase: new URL("https://filefinder.in"),
+  verification: {
+    google: "google-site-verification-id-here", // Replace with your actual ID
+  },
   openGraph: {
     type: "website",
     locale: "en_IN",
@@ -38,12 +41,10 @@ export default async function RootLayout({
   return (
     <html lang="en" className={`${inter.variable}`} suppressHydrationWarning>
       <body className="min-h-dvh flex flex-col bg-background text-foreground">
-        <SessionProvider>
-          <LanguageProvider>
-            {children}
-            <Toast />
-          </LanguageProvider>
-        </SessionProvider>
+        <LanguageProvider>
+          {children}
+          <Toast />
+        </LanguageProvider>
       </body>
     </html>
   );

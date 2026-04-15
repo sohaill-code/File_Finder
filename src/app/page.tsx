@@ -70,7 +70,7 @@ export default async function LandingPage() {
   return (
     <div className="min-h-dvh flex flex-col hero-bg">
       {/* ── Nav ──────────────────────────────────────────────────────────── */}
-      <header className="sticky top-0 z-40 bg-white/70 dark:bg-gray-950/80 backdrop-blur-md border-b border-gray-200/60 dark:border-gray-800/60">
+      <header className="sticky top-0 z-40 bg-white bg-opacity-70 dark:bg-gray-950/80 backdrop-blur-md border-b border-gray-200/60 dark:border-gray-800/60">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-blue-500 flex items-center justify-center shadow-md shadow-blue-500/30">

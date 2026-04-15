@@ -120,7 +120,7 @@ export default function Sidebar({ isOpen, onClose, role }: SidebarProps) {
                 </span>
                 <span>{link.label}</span>
                 {isActive && (
-                  <span className="ml-auto w-1.5 h-1.5 bg-white/70 rounded-full" />
+                  <span className="ml-auto w-1.5 h-1.5 bg-white bg-opacity-70 rounded-full" />
                 )}
               </Link>
             );
