@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import SessionProvider from "@/components/SessionProvider";
 import { LanguageProvider } from "@/contexts/LanguageContext";
+import { ThemeProvider } from "@/components/ThemeProvider";
 import Toast from "@/components/Toast";
 
 const inter = Inter({
@@ -40,13 +41,20 @@ export default async function RootLayout({
 
   return (
     <html lang="en" className={`${inter.variable}`} suppressHydrationWarning>
-      <body className="min-h-dvh flex flex-col bg-background text-foreground">
-        <SessionProvider>
-          <LanguageProvider>
-            {children}
-            <Toast />
-          </LanguageProvider>
-        </SessionProvider>
+      <body className="min-h-dvh flex flex-col antialiased">
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <SessionProvider>
+            <LanguageProvider>
+              {children}
+              <Toast />
+            </LanguageProvider>
+          </SessionProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -1,207 +1,269 @@
-import Link from "next/link";
-import type { Metadata } from "next";
+"use client";
 
-export const metadata: Metadata = {
-  title: "FileFinder — Smart File Management for Indian Businesses",
-  description:
-    "Track, organize, and manage your physical party files with color-coded precision. Google login, multi-language, and team management built in.",
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { 
+  Folder, 
+  Users, 
+  History, 
+  Languages, 
+  CreditCard, 
+  ShieldCheck, 
+  ChevronRight,
+  Search,
+  CheckCircle2
+} from "lucide-react";
+import Header from "@/components/Header";
+
+const FEATURES = [
+  {
+    icon: <Folder className="w-6 h-6" />,
+    title: "Color-Coded Files",
+    desc: "Instantly identify physical folders by their assigned color scheme. No more manual searching.",
+  },
+  {
+    icon: <Users className="w-6 h-6" />,
+    title: "Team Hierarchy",
+    desc: "Boss, Manager, and Staff roles ensure everyone sees exactly what they need to see.",
+  },
+  {
+    icon: <History className="w-6 h-6" />,
+    title: "Audit Logs",
+    desc: "Complete transparency with historical logs. Know who moved what and when.",
+  },
+  {
+    icon: <Languages className="w-6 h-6" />,
+    title: "Multi-Language",
+    desc: "Full support for English, Hindi, Marathi, and Gujarati. Switch instantly.",
+  },
+  {
+    icon: <CreditCard className="w-6 h-6" />,
+    title: "Auto-Billing",
+    desc: "Integrated Razorpay recurring payments for seamless Pro plan access.",
+  },
+  {
+    icon: <ShieldCheck className="w-6 h-6" />,
+    title: "Google Security",
+    desc: "Enterprise-grade authentication with one-click Google Sign-In.",
+  },
+];
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
 };
 
-export default async function LandingPage() {
-  // 🔥 Fully Mocked for Demo (always show landing, no redirect check)
-  
-  const features = [
-    {
-      icon: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
-        </svg>
-      ),
-      title: "Color-Coded Files",
-      desc: "Instantly identify any physical folder by its assigned color. Never hunt through stacks again.",
+const itemVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: {
+      type: "spring",
+      stiffness: 100,
     },
-    {
-      icon: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
-        </svg>
-      ),
-      title: "Team Hierarchy",
-      desc: "Boss, Manager, and Staff roles. Every team member sees exactly what they need.",
-    },
-    {
-      icon: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-          <circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/>
-        </svg>
-      ),
-      title: "Audit Logs",
-      desc: "Every action is recorded. Know who added, edited, or deleted a file and when.",
-    },
-    {
-      icon: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-          <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><path d="M12 18h.01"/>
-        </svg>
-      ),
-      title: "4 Languages",
-      desc: "Full UI in English, हिंदी, मराठी, and ગુજરાતી. Switch instantly from the header.",
-    },
-    {
-      icon: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-          <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><path d="M1 10h22"/>
-        </svg>
-      ),
-      title: "Auto-Billing",
-      desc: "Razorpay recurring subscriptions. Pro access renews automatically every month.",
-    },
-    {
-      icon: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-        </svg>
-      ),
-      title: "Google Login",
-      desc: "One-click sign-in with your Google account. No passwords, no hassle.",
-    },
-  ];
+  },
+};
 
+export default function LandingPage() {
   return (
-    <div className="min-h-dvh flex flex-col hero-bg">
-      {/* ── Nav ──────────────────────────────────────────────────────────── */}
-      <header className="sticky top-0 z-40 bg-white bg-opacity-70 dark:bg-gray-950/80 backdrop-blur-md border-b border-gray-200/60 dark:border-gray-800/60">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Link href="/" className="flex items-center gap-2.5">
-              <img src="/logo.png" alt="FileFinder Logo" className="w-8 h-8 object-contain" />
-              <span className="font-bold text-gray-900 dark:text-white text-lg tracking-tight">FileFinder</span>
-            </Link>
-          </div>
-          <div className="flex items-center gap-3">
-            <Link
-              href="/dashboard"
-              className="hidden sm:block text-sm font-semibold text-gray-600 dark:text-gray-400 hover:text-blue-600 transition-colors"
-            >
-              Login
-            </Link>
-            <Link
-              href="/dashboard"
-              className="flex items-center gap-2 px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition-all shadow-md shadow-blue-500/20 active:scale-95"
-            >
-              Get Started
-            </Link>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-dvh flex flex-col mesh-gradient">
+      <Header />
 
-      {/* ── Hero ─────────────────────────────────────────────────────────── */}
       <main className="flex-1">
-        <section className="max-w-6xl mx-auto px-4 sm:px-6 pt-20 pb-24 text-center">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 rounded-full text-blue-700 dark:text-blue-400 text-sm font-semibold mb-8 animate-fade-in">
-            <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"/>
-            Intelligent File Management
-          </div>
-
-          {/* Headline */}
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-gray-900 dark:text-white leading-tight mb-6 animate-slide-up">
-            Manage{" "}
-            <span className="gradient-text">Physical Files</span>
-            <br className="hidden sm:block"/>
-            {" "}the{" "}
-            <span className="gradient-text">Smart Way</span>
-          </h1>
-
-          <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mb-10 animate-fade-in leading-relaxed">
-            Color-code party files, manage teams with role-based access, and never
-            lose track of a physical folder again. Professional management for physical documentation.
-          </p>
-
-          {/* CTA buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20 animate-slide-up">
-            <Link
-              href="/dashboard"
-              className="flex items-center gap-3 px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl transition-all shadow-xl shadow-blue-500/30 active:scale-95 text-base"
+        {/* ── Hero Section ──────────────────────────────────────────────── */}
+        <section className="relative overflow-hidden pt-20 pb-32">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5 }}
+              className="text-center"
             >
-              Get Started
-            </Link>
-            <a
-              href="#features"
-              className="flex items-center gap-2 px-8 py-4 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 font-semibold rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-all text-base"
-            >
-              See Features
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </a>
-          </div>
-
-          {/* Features grid */}
-          <div id="features" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 text-left">
-            {features.map((f, i) => (
-              <div
-                key={f.title}
-                className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 group"
-                style={{ animationDelay: `${i * 0.08}s` }}
-              >
-                <div className="w-11 h-11 rounded-xl bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
-                  {f.icon}
-                </div>
-                <h3 className="font-bold text-gray-900 dark:text-white mb-2">{f.title}</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{f.desc}</p>
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/10 border border-blue-500/20 rounded-full text-blue-600 dark:text-blue-400 text-sm font-bold mb-8 shadow-sm">
+                <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+                Trusted by 500+ Indian Firms
               </div>
-            ))}
+
+              <h1 className="text-5xl sm:text-7xl font-extrabold tracking-tight mb-8 leading-tight">
+                Manage <span className="gradient-text">Physical Files</span>
+                <br />
+                the <span className="gradient-text">Smart Way</span>
+              </h1>
+
+              <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-12 leading-relaxed">
+                Transform your cluttered office into a streamlined digital digital vault. 
+                Color-code files, manage teams, and track every movement with precision.
+              </p>
+
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20">
+                <Link
+                  href="/dashboard"
+                  className="group flex items-center gap-3 px-8 py-4 bg-primary text-primary-foreground font-bold rounded-2xl transition-all shadow-xl shadow-primary/20 active:scale-95 hover:shadow-2xl hover:shadow-primary/30"
+                >
+                  Get Started for Free
+                  <ChevronRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                </Link>
+                <a
+                  href="#features"
+                  className="flex items-center gap-2 px-8 py-4 bg-background/50 border border-border text-foreground font-bold rounded-2xl hover:bg-muted/50 backdrop-blur-sm transition-all active:scale-95"
+                >
+                  See Features
+                </a>
+              </div>
+            </motion.div>
+
+            {/* Floating Hero UI Mockup */}
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.8 }}
+              className="relative mx-auto max-w-5xl"
+            >
+              <div className="relative glass-card rounded-3xl overflow-hidden shadow-2xl border border-white/20">
+                <div className="p-4 border-b border-border bg-muted/30 flex items-center gap-2">
+                   <div className="w-3 h-3 rounded-full bg-red-400" />
+                   <div className="w-3 h-3 rounded-full bg-amber-400" />
+                   <div className="w-3 h-3 rounded-full bg-green-400" />
+                </div>
+                <div className="grid grid-cols-12 h-[400px]">
+                  <div className="col-span-3 border-r border-border p-4 space-y-4 hidden sm:block bg-muted/10">
+                    <div className="h-4 w-3/4 bg-muted rounded animate-pulse" />
+                    <div className="h-4 w-1/2 bg-muted rounded animate-pulse" />
+                    <div className="h-4 w-2/3 bg-muted rounded animate-pulse" />
+                  </div>
+                  <div className="col-span-12 sm:col-span-9 p-8">
+                     <div className="flex items-center justify-between mb-8">
+                        <div className="h-8 w-40 bg-muted rounded-xl animate-pulse" />
+                        <div className="h-10 w-10 bg-primary/20 rounded-full animate-pulse" />
+                     </div>
+                     <div className="space-y-4">
+                        {[1, 2, 3].map(i => (
+                          <div key={i} className="h-16 w-full bg-muted/20 rounded-2xl flex items-center px-4 gap-4">
+                             <div className="w-10 h-10 rounded-xl bg-blue-500/20" />
+                             <div className="h-4 w-40 bg-muted rounded" />
+                             <div className="ml-auto h-4 w-20 bg-muted rounded" />
+                          </div>
+                        ))}
+                     </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Floating Element */}
+              <motion.div 
+                className="absolute -top-12 -right-12 w-24 h-24 bg-indigo-600 rounded-3xl flex items-center justify-center text-white shadow-2xl animate-float z-20"
+                style={{ rotate: 12 }}
+              >
+                <Folder size={40} />
+              </motion.div>
+              <motion.div 
+                className="absolute -bottom-8 -left-8 w-20 h-20 bg-white dark:bg-zinc-900 rounded-2xl flex items-center justify-center text-blue-600 shadow-2xl animate-float z-20"
+                style={{ rotate: -8, animationDelay: '1s' }}
+              >
+                <Search size={32} />
+              </motion.div>
+            </motion.div>
           </div>
         </section>
 
-        {/* ── Pricing preview ─────────────────────────────────────────────── */}
-        <section className="bg-gray-50 dark:bg-gray-900/50 border-t border-gray-200 dark:border-gray-800 py-20">
-          <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center">
-            <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white mb-3">Simple, Transparent Pricing</h2>
-            <p className="text-gray-600 dark:text-gray-400 mb-12">Start free. Upgrade when you need more power.</p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {[
-                { plan: "Free", price: "₹0", period: "forever", features: ["Up to 50 files", "Google login", "Color coding", "Export CSV"], cta: "Start Free", highlight: false },
-                { plan: "Pro", price: "₹20", period: "/ month", features: ["Unlimited files", "Team management", "Audit logs", "Priority support", "4 languages", "Auto-renewed"], cta: "Subscribe Now", highlight: true },
-              ].map((p) => (
-                <div
-                  key={p.plan}
-                  className={`rounded-2xl p-6 border-2 text-left ${p.highlight ? "border-blue-500 bg-blue-600 text-white shadow-xl shadow-blue-500/20" : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900"}`}
+        {/* ── Features Grid ─────────────────────────────────────────────── */}
+        <section id="features" className="py-24 bg-background/50 backdrop-blur-sm relative border-y border-border">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl font-extrabold sm:text-4xl mb-4">Enterprise Features</h2>
+              <p className="text-muted-foreground">Everything you need to manage thousands of files securely.</p>
+            </div>
+
+            <motion.div 
+              variants={containerVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+            >
+              {FEATURES.map((f, i) => (
+                <motion.div
+                  key={f.title}
+                  variants={itemVariants}
+                  className="glass-card p-8 rounded-3xl hover:border-primary/50 transition-all duration-300 group"
                 >
-                  <p className={`text-xs font-bold uppercase tracking-widest mb-2 ${p.highlight ? "text-blue-200" : "text-gray-500"}`}>{p.plan}</p>
-                  <div className="flex items-end gap-1 mb-5">
-                    <span className={`text-4xl font-extrabold ${p.highlight ? "text-white" : "text-gray-900 dark:text-white"}`}>{p.price}</span>
-                    <span className={`pb-1 ${p.highlight ? "text-blue-200" : "text-gray-500"}`}>{p.period}</span>
+                  <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    {f.icon}
                   </div>
-                  <ul className="space-y-2 mb-6">
-                    {p.features.map((f) => (
-                      <li key={f} className={`flex items-center gap-2 text-sm ${p.highlight ? "text-blue-50" : "text-gray-700 dark:text-gray-300"}`}>
-                        <svg className={p.highlight ? "text-yellow-300" : "text-green-500"} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20 6L9 17l-5-5"/></svg>
-                        {f}
-                      </li>
+                  <h3 className="text-xl font-bold mb-3">{f.title}</h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed">{f.desc}</p>
+                </motion.div>
+              ))}
+            </motion.div>
+          </div>
+        </section>
+
+        {/* ── Pricing Preview ───────────────────────────────────────────── */}
+        <section className="py-24">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="glass-card rounded-[40px] p-8 sm:p-12 overflow-hidden relative">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 blur-[100px] -z-10" />
+              <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-500/10 blur-[100px] -z-10" />
+              
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div>
+                  <h2 className="text-4xl font-extrabold mb-6 leading-tight">Ready to Upgrade your <span className="gradient-text">File System?</span></h2>
+                  <p className="text-muted-foreground mb-8">Join hundreds of firms already using FileFinder to save time and reduce errors in their physical file management.</p>
+                  <div className="space-y-4 mb-8">
+                    {[
+                      "Unlimited file records",
+                      "Priority 24/7 support",
+                      "Advanced team permissions",
+                      "Custom reporting & filters"
+                    ].map(text => (
+                      <div key={text} className="flex items-center gap-3">
+                        <CheckCircle2 size={18} className="text-blue-500" />
+                        <span className="text-sm font-semibold">{text}</span>
+                      </div>
                     ))}
-                  </ul>
+                  </div>
+                </div>
+                
+                <div className="bg-white dark:bg-zinc-950 rounded-[32px] p-8 shadow-2xl border border-border relative">
+                  <div className="inline-block px-3 py-1 bg-blue-500 text-white text-[10px] font-bold rounded-full uppercase tracking-widest mb-6">Pro Plan</div>
+                  <div className="flex items-baseline gap-2 mb-2">
+                    <span className="text-6xl font-black">₹20</span>
+                    <span className="text-muted-foreground">/month</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-8 text-balance leading-relaxed">Cancel anytime. 2 months free when billed annually at ₹200.</p>
                   <Link
                     href="/dashboard"
-                    className={`block w-full py-3 rounded-xl text-center text-sm font-bold transition-all active:scale-95
-                      ${p.highlight ? "bg-white text-blue-700 hover:bg-blue-50 shadow-md" : "bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-500/20"}`}
+                    className="block w-full py-4 bg-primary text-primary-foreground text-center font-bold rounded-2xl shadow-lg shadow-primary/30 transition-all hover:scale-[1.02] active:scale-[0.98]"
                   >
-                    {p.cta}
+                    Subscribe Now
                   </Link>
                 </div>
-              ))}
+              </div>
             </div>
           </div>
         </section>
       </main>
 
-      {/* ── Footer ───────────────────────────────────────────────────────── */}
-      <footer className="border-t border-gray-200 dark:border-gray-800 py-12">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col items-center gap-6">
-          <div className="flex items-center gap-2.5 opacity-60 grayscale hover:grayscale-0 transition-all duration-300">
-             <img src="/logo.png" alt="FileFinder Logo" className="w-6 h-6 object-contain" />
-             <span className="font-bold text-gray-900 dark:text-white text-base">FileFinder</span>
-          </div>
-          <p className="text-sm text-gray-500 dark:text-gray-400">© {new Date().getFullYear()} FileFinder. Intelligent Physical File Management.</p>
+      <footer className="py-12 bg-background border-t border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center sm:text-left">
+           <div className="flex flex-col sm:flex-row items-center justify-between gap-8">
+             <div className="flex items-center gap-3">
+               <img src="/logo.png" alt="FileFinder" className="w-8 h-8 grayscale opacity-50" />
+               <span className="font-bold text-muted-foreground">FileFinder</span>
+             </div>
+             <p className="text-sm text-muted-foreground">© {new Date().getFullYear()} FileFinder. Intelligent Management for Indian Businesses.</p>
+             <div className="flex items-center gap-6">
+               <a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">Privacy</a>
+               <a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">Terms</a>
+               <a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">Support</a>
+             </div>
+           </div>
         </div>
       </footer>
     </div>
