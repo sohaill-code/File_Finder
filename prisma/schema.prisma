@@ -4,22 +4,33 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  url      = "file:./dev.db"
+  url      = env("DATABASE_URL")
 }
 
+// ─────────────────────────────────────────────
+// Enums
+// ─────────────────────────────────────────────
+
+// SQLite does not support native enums — stored as String
+// Valid values: "BOSS" | "MANAGER" | "STAFF"
+
+// ─────────────────────────────────────────────
+// NextAuth Models
+// ─────────────────────────────────────────────
+
 model Account {
-  id                 String  @id @default(cuid())
-  userId             String
-  type               String
-  provider           String
-  providerAccountId  String
-  refresh_token      String?
-  access_token       String?
-  expires_at         Int?
-  token_type         String?
-  scope              String?
-  id_token           String?
-  session_state      String?
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -34,19 +45,6 @@ model Session {
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  image         String?
-  isPro         Boolean   @default(false)
-  accounts      Account[]
-  sessions      Session[]
-  parties       PartyFile[]
-  payments      Payment[]
-}
-
 model VerificationToken {
   identifier String
   token      String   @unique
@@ -55,11 +53,48 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
+// ─────────────────────────────────────────────
+// Core Models
+// ─────────────────────────────────────────────
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+
+  // Role: "BOSS" | "MANAGER" | "STAFF"
+  role          String    @default("STAFF")
+
+  // Subscription
+  isPro                Boolean   @default(false)
+  subscriptionId       String?   // Razorpay subscription ID
+  subscriptionStatus   String?   // active | halted | cancelled | expired | pending
+  currentPeriodEnd     DateTime? // When the current billing period ends
+  plan                 String?   // "monthly" | "yearly"
+
+  // Hierarchy
+  managerId     String?
+  manager       User?       @relation("ManagerToStaff", fields: [managerId], references: [id])
+  managedUsers  User[]      @relation("ManagerToStaff")
+
+  // Relations
+  accounts      Account[]
+  sessions      Session[]
+  parties       PartyFile[]
+  payments      Payment[]
+  auditLogs     AuditLog[]
+}
+
 model PartyFile {
   id        String   @id @default(cuid())
   userId    String
   name      String
   colorId   String
+  colorName String   @default("Blue")
+  colorHex  String   @default("#3b82f6")
+  notes     String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -67,13 +102,28 @@ model PartyFile {
 }
 
 model Payment {
+  id                 String    @id @default(cuid())
+  userId             String
+  subscriptionId     String?   // Razorpay subscription ID
+  paymentId          String?   // Razorpay payment ID (from webhook)
+  amount             Int       // In paise (₹20 = 2000)
+  plan               String    // "monthly" | "yearly"
+  status             String    @default("pending") // pending | active | halted | cancelled | failed
+  razorpayOrderId    String?   // populated on subscription.charged webhook
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AuditLog {
   id        String   @id @default(cuid())
   userId    String
-  orderId   String   @unique
-  paymentId String?
-  amount    Int
-  plan      String   // "monthly" or "yearly"
-  status    String   @default("pending") // "pending", "success", "failed"
+  action    String   // CREATE_PARTY | UPDATE_PARTY | DELETE_PARTY | SUBSCRIBE | CANCEL_SUB | ROLE_CHANGE | LOGIN | EXPORT
+  target    String?  // "PartyFile" | "User" | "Payment"
+  targetId  String?
+  metadata  String?  // JSON string: { before, after, extra }
+  ip        String?
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
