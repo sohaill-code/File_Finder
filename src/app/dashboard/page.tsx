@@ -64,10 +64,10 @@ export default async function DashboardPage() {
             colorId: p.colorId,
             colorName: p.colorName,
             colorHex: p.colorHex,
-            notes: p.notes,
-            createdAt: typeof p.createdAt === "string" ? p.createdAt : p.createdAt.toISOString(),
+            notes: p.notes ?? null,
+            createdAt: typeof p.createdAt === "string" ? p.createdAt : (p.createdAt as Date).toISOString(),
             userId: p.userId,
-            user: p.user,
+            user: p.user ? { name: p.user.name ?? null, email: p.user.email ?? null } : undefined,
           }))}
         />
       </div>

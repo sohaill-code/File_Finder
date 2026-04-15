@@ -11,10 +11,10 @@ export const MOCK_USER = {
 
 export const MOCK_PARTIES = [
   { id: "p1", name: "Reliance Industries", colorId: "c_blue", colorName: "Blue", colorHex: "#3b82f6", notes: "Q3 Audit Files", createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(), userId: "mock_demo_boss", user: { name: "Demo Admin", email: "admin@filefinder.in" } },
-  { id: "p2", name: "Tata Consultancy", colorId: "c_red", colorName: "Red", colorHex: "#ef4444", notes: "HR Records 2023", createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), userId: "mock_demo_boss" },
-  { id: "p3", name: "Infosys Branch 4", colorId: "c_green", colorName: "Green", colorHex: "#22c55e", notes: "Aarti's desk", createdAt: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(), userId: "u2", user: { name: "Rahul Verma" } },
-  { id: "p4", name: "Adani Enterprises", colorId: "c_purple", colorName: "Purple", colorHex: "#a855f7", notes: "Compliance folder", createdAt: new Date(Date.now() - 1000 * 60 * 60 * 72).toISOString(), userId: "mock_demo_boss" },
-  { id: "p5", name: "Wipro Tech", colorId: "c_yellow", colorName: "Yellow", colorHex: "#eab308", notes: "Invoices pending", createdAt: new Date(Date.now() - 1000 * 60 * 60 * 96).toISOString(), userId: "u3", user: { name: "Sneha Patel" } },
+  { id: "p2", name: "Tata Consultancy", colorId: "c_red", colorName: "Red", colorHex: "#ef4444", notes: "HR Records 2023", createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), userId: "mock_demo_boss", user: { name: "Demo Admin", email: "admin@filefinder.in" } },
+  { id: "p3", name: "Infosys Branch 4", colorId: "c_green", colorName: "Green", colorHex: "#22c55e", notes: "Aarti's desk", createdAt: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(), userId: "u2", user: { name: "Rahul Verma", email: null } },
+  { id: "p4", name: "Adani Enterprises", colorId: "c_purple", colorName: "Purple", colorHex: "#a855f7", notes: "Compliance folder", createdAt: new Date(Date.now() - 1000 * 60 * 60 * 72).toISOString(), userId: "mock_demo_boss", user: { name: "Demo Admin", email: "admin@filefinder.in" } },
+  { id: "p5", name: "Wipro Tech", colorId: "c_yellow", colorName: "Yellow", colorHex: "#eab308", notes: "Invoices pending", createdAt: new Date(Date.now() - 1000 * 60 * 60 * 96).toISOString(), userId: "u3", user: { name: "Sneha Patel", email: null } },
 ];
 
 export const MOCK_USERS = [
