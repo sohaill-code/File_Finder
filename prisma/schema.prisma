@@ -45,12 +45,17 @@ model Session {
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-model VerificationToken {
-  identifier String
-  token      String   @unique
-  expires    DateTime
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String   // 'FILE_ADDED', 'SUBSCRIPTION', 'TEAM_JOIN'
+  title     String
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
 
-  @@unique([identifier, token])
+  @@index([userId])
 }
 
 // ─────────────────────────────────────────────
@@ -66,6 +71,14 @@ model User {
 
   // Role: "BOSS" | "MANAGER" | "STAFF"
   role          String    @default("STAFF")
+  
+  // Unique Invite Code (e.g., FF-1234) for BOSS roles
+  inviteCode    String?   @unique
+  
+  // Link to Boss (for STAFF/MANAGER)
+  bossId        String?
+  boss          User?     @relation("BossToStaff", fields: [bossId], references: [id])
+  staff         User[]    @relation("BossToStaff")
 
   // Subscription
   isPro                Boolean   @default(false)
@@ -74,7 +87,7 @@ model User {
   currentPeriodEnd     DateTime? // When the current billing period ends
   plan                 String?   // "monthly" | "yearly"
 
-  // Hierarchy
+  // Hierarchy (Self-relation for Managers)
   managerId     String?
   manager       User?       @relation("ManagerToStaff", fields: [managerId], references: [id])
   managedUsers  User[]      @relation("ManagerToStaff")
@@ -85,11 +98,13 @@ model User {
   parties       PartyFile[]
   payments      Payment[]
   auditLogs     AuditLog[]
+  notifications Notification[]
 }
 
 model PartyFile {
   id        String   @id @default(cuid())
-  userId    String
+  userId    String   // The owner of the file (BOSS id)
+  creatorId String?  // The user who actually created it
   name      String
   colorId   String
   colorName String   @default("Blue")
@@ -127,4 +142,11 @@ model AuditLog {
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
 }

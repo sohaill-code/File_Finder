@@ -11,49 +11,28 @@ export const metadata: Metadata = { title: "Dashboard" };
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
 
-  // For testing/demo purposes, use a fallback user if not authenticated
-  let user = null;
   if (!session?.user) {
-    user = {
-      id: "demo_user",
-      name: "Demo User",
-      role: "BOSS",
-      isPro: true,
-    };
-  } else {
-    // Fetch full user for role
-    user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { id: true, name: true, role: true, isPro: true },
-    });
+    redirect("/");
   }
+
+  // Fetch full user for role and organization context
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { id: true, name: true, role: true, isPro: true, bossId: true, inviteCode: true },
+  });
 
   if (!user) {
     redirect("/");
   }
 
-  // Fetch party files for this organization with robust fallback
-  let parties: any[] = [];
-  try {
-    parties = await prisma.partyFile.findMany({
-      where: user.role === "BOSS" ? {} : { userId: user.id },
-      include: { user: { select: { name: true, email: true } } },
-      orderBy: { createdAt: "desc" },
-    });
-  } catch (error) {
-    console.error("Prisma error, falling back to demo data:", error);
-  }
+  const organizationId = user.bossId || user.id;
 
-  // If testing with empty DB or Prisma failed, add mock data sample
-  if (parties.length === 0) {
-    const now = new Date();
-    parties = [
-      { id: "1", name: "Reliance Industries", colorId: "c_blue", colorName: "Blue", colorHex: "#3b82f6", notes: "Petrochemical records", createdAt: now, updatedAt: now, userId: user.id, user: { name: user.name, email: "demo@filefinder.in" } },
-      { id: "2", name: "Tata Steel", colorId: "c_red", colorName: "Red", hex: "#ef4444", colorHex: "#ef4444", notes: "Export documentation", createdAt: now, updatedAt: now, userId: user.id, user: { name: user.name, email: "demo@filefinder.in" } },
-      { id: "3", name: "HDFC Bank", colorId: "c_green", colorName: "Green", colorHex: "#22c55e", notes: "Financial statements", createdAt: now, updatedAt: now, userId: user.id, user: { name: user.name, email: "demo@filefinder.in" } },
-      { id: "4", name: "Infosys Ltd", colorId: "c_purple", colorName: "Purple", colorHex: "#a855f7", notes: "IT service contracts", createdAt: now, updatedAt: now, userId: user.id, user: { name: user.name, email: "demo@filefinder.in" } },
-    ] as any;
-  }
+  // Fetch real party files for this organization
+  const parties = await prisma.partyFile.findMany({
+    where: { userId: organizationId },
+    include: { user: { select: { name: true, email: true } } },
+    orderBy: { createdAt: "desc" },
+  });
 
   return (
     <DashboardLayout role={user.role}>
@@ -61,53 +40,57 @@ export default async function DashboardPage() {
         {/* Page Header */}
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight uppercase">
               Welcome back, {user.name?.split(" ")[0] ?? "User"} 👋
             </h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              You're viewing all party files across your organization.
+            <p className="text-sm font-bold text-slate-500 dark:text-zinc-500 mt-1">
+              {user.role === "BOSS" ? "Managing organization-wide records." : "Collaborating with your team records."}
             </p>
           </div>
           {user.isPro && (
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20">
-              <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
-              <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">Pro Account</span>
+            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 shadow-sm shadow-indigo-500/5">
+              <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse shadow-[0_0_8px_rgba(79,70,229,0.8)]" />
+              <span className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">Pro Agent Account</span>
             </div>
           )}
         </div>
 
         {/* Stats row */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
           {[
-            { label: "Total Files", value: parties.length, icon: "📁", color: "text-blue-600 bg-blue-50 dark:bg-blue-500/10" },
-            { label: "Active Clients", value: new Set(parties.map(p => p.name)).size, icon: "🏢", color: "text-purple-600 bg-purple-50 dark:bg-purple-500/10" },
-            { label: "This Month", value: parties.filter(p => new Date(p.createdAt).getMonth() === new Date().getMonth()).length, icon: "📈", color: "text-green-600 bg-green-50 dark:bg-green-500/10" },
-            { label: "Role", value: user.role, icon: "🔑", color: "text-amber-600 bg-amber-50 dark:bg-amber-500/10" },
+            { label: "Total Files", value: parties.length, icon: "Files", color: "indigo" },
+            { label: "Active Clients", value: new Set(parties.map(p => p.name)).size, icon: "Users", color: "amber" },
+            { label: "Organization ID", value: user.inviteCode || user.bossId?.slice(0, 8) || "MEMBER", icon: "Key", color: "blue" },
+            { label: "Role Authority", value: user.role, icon: "Shield", color: "emerald" },
           ].map((s) => (
-            <div key={s.label} className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-5 shadow-sm hover:shadow-md transition-shadow">
-              <div className="flex items-center justify-between mb-3">
-                <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide font-semibold">{s.label}</p>
-                <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm ${s.color}`}>{s.icon}</span>
+            <div key={s.label} className="glass-card bg-white/50 dark:bg-zinc-900/50 rounded-[32px] p-6 border border-slate-100 dark:border-zinc-800 shadow-sm hover:shadow-xl hover:scale-[1.01] transition-all group overflow-hidden relative">
+              <div className="flex flex-col">
+                <p className="text-[10px] text-slate-400 dark:text-zinc-500 uppercase tracking-[0.2em] font-black mb-1">{s.label}</p>
+                <p className="text-3xl font-black text-slate-900 dark:text-white tabular-nums tracking-tighter">{s.value}</p>
               </div>
-              <p className="text-3xl font-extrabold text-gray-900 dark:text-white tabular-nums">{s.value}</p>
+              <div className="absolute -right-4 -bottom-4 opacity-[0.03] dark:opacity-[0.03] group-hover:opacity-[0.07] transition-opacity">
+                 {/* Decorative background element could go here */}
+              </div>
             </div>
           ))}
         </div>
 
         {/* Client Table Component */}
-        <PartyTable
-          initialParties={parties.map((p) => ({
-            id: p.id,
-            name: p.name,
-            colorId: p.colorId,
-            colorName: p.colorName,
-            colorHex: p.colorHex,
-            notes: p.notes ?? null,
-            createdAt: p.createdAt.toISOString(),
-            userId: p.userId,
-            user: p.user ? { name: p.user.name ?? null, email: p.user.email ?? null } : undefined,
-          }))}
-        />
+        <div className="mt-4">
+          <PartyTable
+            initialParties={parties.map((p) => ({
+              id: p.id,
+              name: p.name,
+              colorId: p.colorId,
+              colorName: p.colorName,
+              colorHex: p.colorHex,
+              notes: p.notes ?? null,
+              createdAt: p.createdAt.toISOString(),
+              userId: p.userId,
+              user: p.user ? { name: p.user.name ?? null, email: p.user.email ?? null } : undefined,
+            }))}
+          />
+        </div>
       </div>
     </DashboardLayout>
   );

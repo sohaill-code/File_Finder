@@ -3,8 +3,10 @@
 import { useState } from "react";
 import { useLang } from "@/contexts/LanguageContext";
 import { toast } from "@/components/Toast";
-import { useSession } from "next-auth/react";
+import { useSession, signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { Check, Sparkles, Zap, Shield, Crown } from "lucide-react";
+import { motion } from "framer-motion";
 
 interface PricingCardProps {
   currentPlan?: string | null;
@@ -16,130 +18,179 @@ export default function PricingCard({ currentPlan, isPro, currentSubscriptionId 
   const { T } = useLang();
   const { data: session } = useSession();
   const router = useRouter();
-  const [billing, setBilling] = useState<"monthly" | "yearly">("monthly");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<string | null>(null);
 
-  const handleSubscribe = async () => {
-    if (!session) {
-      toast("Please sign in to choose a plan", "error");
-      return;
-    }
-    setLoading(true);
-    setTimeout(() => {
-      toast("Plan Selected! This is a demo mode.", "success");
-      setLoading(false);
-      router.push("/dashboard");
-    }, 800);
+  const loadRazorpay = () => {
+    return new Promise((resolve) => {
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
   };
 
-  const isCurrentMonthly = isPro && currentPlan === "monthly";
-  const isCurrentYearly = isPro && currentPlan === "yearly";
+  const handleSubscribe = async (plan: "monthly" | "yearly") => {
+    if (!session) return signIn("google");
+    
+    setLoading(plan);
+    try {
+      const res = await fetch("/api/razorpay/subscription", {
+        method: "POST",
+        body: JSON.stringify({ plan }),
+      });
+      const data = await res.json();
+      
+      const isLoaded = await loadRazorpay();
+      if (!isLoaded) {
+        toast("Razorpay failed to load", "error");
+        return;
+      }
+
+      const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+        subscription_id: data.id,
+        name: "FileFinder SaaS",
+        description: `${plan === 'monthly' ? 'Monthly' : 'Yearly'} Pro Subscription`,
+        image: "/logo.png",
+        handler: function (response: any) {
+          toast("Payment Successful! Upgrading account...", "success");
+          router.push("/dashboard?status=success");
+        },
+        prefill: {
+          name: session.user?.name,
+          email: session.user?.email,
+        },
+        theme: { color: "#4f46e5" },
+      };
+
+      const rzp = new (window as any).Razorpay(options);
+      rzp.open();
+    } catch (err) {
+      toast("Error creating subscription", "error");
+    } finally {
+      setLoading(null);
+    }
+  };
+
+  const PLANS = [
+    {
+      id: "free",
+      name: "Free Solo",
+      price: "₹0",
+      period: "Forever",
+      desc: "For small billing agents",
+      features: ["5 Total File Records", "Basic Search", "Single Language", "Community Support"],
+      button: "Current Plan",
+      isCurrent: !isPro,
+      color: "border-slate-200 dark:border-zinc-800",
+      accent: "bg-slate-500",
+      icon: Zap
+    },
+    {
+      id: "monthly",
+      name: "Boss Monthly",
+      price: "₹20",
+      period: "/month",
+      desc: "Perfect for growing offices",
+      features: ["Unlimited File Records", "Smart OCR Entry", "Team Hierarchy ID", "Admin Notifications", "Pro Marker Colors"],
+      button: "Go Pro Monthly",
+      isCurrent: isPro && currentPlan === "monthly",
+      color: "border-indigo-600 dark:border-indigo-500/50 scale-105 shadow-2xl z-10 relative",
+      accent: "bg-indigo-600",
+      icon: Shield,
+      popular: true
+    },
+    {
+      id: "yearly",
+      name: "Boss Yearly",
+      price: "₹200",
+      period: "/year",
+      desc: "Maximum value for teams",
+      features: ["Everything in Monthly", "2 Months FREE (₹16/mo)", "Priority Multi-Boss", "Dedicated Success Manager", "Custom Export Formats"],
+      button: "Claim Yearly Offer",
+      isCurrent: isPro && currentPlan === "yearly",
+      color: "border-slate-200 dark:border-zinc-800",
+      accent: "bg-amber-600",
+      icon: Crown
+    }
+  ];
 
   return (
-    <div className="w-full max-w-3xl mx-auto">
-      {/* Toggle */}
-      <div className="flex items-center justify-center gap-4 mb-10">
-        <span className={`text-sm font-semibold transition-colors ${billing === "monthly" ? "text-gray-900 dark:text-white" : "text-gray-400"}`}>
-          {T("monthly")}
-        </span>
-        <button
-          id="billing-toggle"
-          onClick={() => setBilling((b) => (b === "monthly" ? "yearly" : "monthly"))}
-          className={`relative w-14 h-7 rounded-full transition-colors duration-300 ${billing === "yearly" ? "bg-blue-600" : "bg-gray-300 dark:bg-gray-700"}`}
-          aria-label="Toggle billing period"
-        >
-          <span className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-300 ${billing === "yearly" ? "translate-x-7" : "translate-x-0"}`}/>
-        </button>
-        <span className={`text-sm font-semibold transition-colors ${billing === "yearly" ? "text-gray-900 dark:text-white" : "text-gray-400"}`}>
-          {T("yearly")}
-          {billing === "yearly" && (
-            <span className="ml-2 inline-flex items-center px-2 py-0.5 bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400 text-[10px] font-bold rounded-full uppercase tracking-wide">
-              {T("bestValue")}
-            </span>
-          )}
-        </span>
-      </div>
-
-      {/* Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        {/* Monthly */}
-        <div
-          id="plan-monthly"
-          onClick={() => setBilling("monthly")}
-          className={`relative cursor-pointer bg-white dark:bg-gray-900 rounded-2xl border-2 p-6 transition-all duration-200 shadow-sm hover:shadow-md
-            ${billing === "monthly" ? "border-blue-500 ring-4 ring-blue-500/10" : "border-gray-200 dark:border-gray-800"}`}
-        >
-          {isCurrentMonthly && (
-            <span className="absolute top-4 right-4 px-2.5 py-1 bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400 text-[10px] font-bold uppercase rounded-full tracking-wide">
-              {T("currentPlanBadge")}
-            </span>
-          )}
-          <p className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-3">{T("monthly")}</p>
-          <div className="flex items-end gap-1 mb-1">
-            <span className="text-4xl font-extrabold text-gray-900 dark:text-white">{T("priceMonthly")}</span>
-            <span className="text-gray-500 dark:text-gray-400 pb-1">{T("perMonth")}</span>
-          </div>
-          <p className="text-xs text-gray-500 mb-6">Billed monthly. Cancel anytime.</p>
-          <ul className="space-y-2.5 mb-6">
-            {["Unlimited file records", "Color-coded organization", "CSV export", "Multi-language UI", "Priority support"].map((f) => (
-              <li key={f} className="flex items-center gap-2.5 text-sm text-gray-700 dark:text-gray-300">
-                <svg className="text-green-500 shrink-0" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20 6L9 17l-5-5"/></svg>
-                {f}
-              </li>
-            ))}
-          </ul>
-          <button
-            id="subscribe-monthly-btn"
-            onClick={(e) => { e.stopPropagation(); setBilling("monthly"); handleSubscribe(); }}
-            disabled={loading || isCurrentMonthly}
-            className={`w-full py-3 rounded-xl text-sm font-bold transition-all active:scale-95 disabled:pointer-events-none shadow-md
-              ${isCurrentMonthly
-                ? "bg-green-100 dark:bg-green-500/10 text-green-700 dark:text-green-400 cursor-default shadow-none"
-                : "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/20 disabled:opacity-60"
-              }`}
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch pb-10">
+      {PLANS.map((plan) => {
+        const Icon = plan.icon;
+        return (
+          <div
+            key={plan.id}
+            className={`
+              glass-card rounded-[40px] p-8 border-2 flex flex-col transition-all duration-500 relative
+              ${plan.color} ${plan.id === 'monthly' ? 'lg:-translate-y-4' : ''}
+            `}
           >
-            {isCurrentMonthly ? "✓ " + T("currentPlanBadge") : loading && billing === "monthly" ? T("loading") : T("subscribeNow")}
-          </button>
-        </div>
+            {plan.popular && (
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-indigo-600 text-white text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg flex items-center gap-1.5 z-20">
+                 <Sparkles size={10} /> Most Popular
+              </div>
+            )}
 
-        {/* Yearly */}
-        <div
-          id="plan-yearly"
-          onClick={() => setBilling("yearly")}
-          className={`relative cursor-pointer bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl border-2 p-6 transition-all duration-200 shadow-lg hover:shadow-xl text-white
-            ${billing === "yearly" ? "border-white/30 ring-4 ring-blue-500/20 scale-[1.02]" : "border-blue-500/0 opacity-90 hover:opacity-100"}`}
-        >
-          <span className="absolute top-4 right-4 px-2.5 py-1 bg-white/20 text-white text-[10px] font-bold uppercase rounded-full tracking-wide">
-            {isCurrentYearly ? T("currentPlanBadge") : T("bestValue")}
-          </span>
-          <p className="text-xs font-bold uppercase tracking-widest text-blue-200 mb-3">{T("yearly")}</p>
-          <div className="flex items-end gap-1 mb-1">
-            <span className="text-4xl font-extrabold">{T("priceYearly")}</span>
-            <span className="text-blue-200 pb-1">{T("perYear")}</span>
+            <div className="flex items-center justify-between mb-6">
+               <div className={`w-12 h-12 rounded-2xl ${plan.accent} bg-opacity-10 dark:bg-opacity-20 flex items-center justify-center shrink-0`}>
+                  <Icon className={`${plan.id === 'monthly' ? 'text-indigo-600 dark:text-indigo-400' : plan.id === 'yearly' ? 'text-amber-500' : 'text-slate-500'}`} size={24} />
+               </div>
+               {plan.isCurrent && (
+                 <span className="px-3 py-1 bg-green-500/10 text-green-500 text-[10px] font-black uppercase tracking-wider rounded-full flex items-center gap-1">
+                   <Check size={10} /> In Use
+                 </span>
+               )}
+            </div>
+
+            <div className="mb-2">
+               <h3 className="text-xl font-black tracking-tight text-slate-900 dark:text-white">{plan.name}</h3>
+               <p className="text-xs text-slate-500 dark:text-zinc-500 font-bold">{plan.desc}</p>
+            </div>
+
+            <div className="flex items-baseline gap-1 mt-4 mb-8">
+               <span className="text-4xl font-black tracking-tighter text-slate-900 dark:text-white">{plan.price}</span>
+               <span className="text-slate-500 dark:text-zinc-500 text-xs font-bold">{plan.period}</span>
+            </div>
+
+            <ul className="space-y-4 mb-10 flex-1">
+              {plan.features.map((f, i) => (
+                <li key={i} className="flex items-start gap-3">
+                   <div className={`mt-1 w-4 h-4 rounded-full flex items-center justify-center shrink-0 ${plan.id === 'free' ? 'bg-slate-100 dark:bg-zinc-800' : 'bg-indigo-500/10'}`}>
+                      <Check size={10} className={plan.id === 'free' ? 'text-slate-400' : 'text-indigo-500'} />
+                   </div>
+                   <span className="text-sm font-bold text-slate-700 dark:text-zinc-300 leading-tight">{f}</span>
+                </li>
+              ))}
+            </ul>
+
+            <button
+              onClick={() => plan.id !== 'free' && handleSubscribe(plan.id as 'monthly' | 'yearly')}
+              disabled={plan.isCurrent || !!loading}
+              className={`
+                w-full py-4.5 rounded-[24px] text-xs font-black uppercase tracking-widest transition-all active:scale-95
+                ${plan.isCurrent 
+                  ? "bg-slate-100 dark:bg-zinc-800 text-slate-400 cursor-default" 
+                  : plan.id === 'free' 
+                    ? "bg-slate-100 dark:bg-zinc-800 text-slate-900 dark:text-white" 
+                    : plan.id === 'monthly'
+                      ? "bg-indigo-600 text-white shadow-xl shadow-indigo-600/30 hover:bg-indigo-700 hover:shadow-2xl"
+                      : "bg-slate-900 dark:bg-zinc-100 text-white dark:text-zinc-900 shadow-xl hover:opacity-90"
+                }
+              `}
+            >
+              {loading === plan.id ? (
+                <div className="flex items-center justify-center gap-2">
+                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                   Opening Secure Checkout...
+                </div>
+              ) : plan.isCurrent ? "Current Plan" : plan.button}
+            </button>
           </div>
-          <p className="text-xs text-blue-200 mb-6">Save ₹40 vs. monthly billing.</p>
-          <ul className="space-y-2.5 mb-6">
-            {["Everything in Monthly", "2 months FREE", "Team hierarchy access", "Audit logs", "Multi-user management"].map((f) => (
-              <li key={f} className="flex items-center gap-2.5 text-sm text-blue-50">
-                <svg className="text-yellow-300 shrink-0" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20 6L9 17l-5-5"/></svg>
-                {f}
-              </li>
-            ))}
-          </ul>
-          <button
-            id="subscribe-yearly-btn"
-            onClick={(e) => { e.stopPropagation(); setBilling("yearly"); handleSubscribe(); }}
-            disabled={loading || isCurrentYearly}
-            className={`w-full py-3 rounded-xl text-sm font-bold transition-all active:scale-95 disabled:pointer-events-none shadow-md
-              ${isCurrentYearly
-                ? "bg-white/20 text-white cursor-default shadow-none"
-                : "bg-white hover:bg-blue-50 text-blue-700 shadow-white/20 disabled:opacity-60"
-              }`}
-          >
-            {isCurrentYearly ? "✓ " + T("currentPlanBadge") : loading && billing === "yearly" ? T("loading") : T("subscribeNow")}
-          </button>
-        </div>
-      </div>
+        );
+      })}
     </div>
   );
 }

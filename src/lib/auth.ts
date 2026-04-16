@@ -21,6 +21,8 @@ export const authOptions: NextAuthOptions = {
           select: {
             role: true,
             isPro: true,
+            bossId: true,
+            inviteCode: true,
             subscriptionId: true,
             subscriptionStatus: true,
             currentPeriodEnd: true,
@@ -30,6 +32,8 @@ export const authOptions: NextAuthOptions = {
         if (dbUser) {
           session.user.role = dbUser.role as "BOSS" | "MANAGER" | "STAFF";
           session.user.isPro = dbUser.isPro;
+          session.user.bossId = dbUser.bossId;
+          session.user.inviteCode = dbUser.inviteCode;
           session.user.subscriptionId = dbUser.subscriptionId ?? undefined;
           session.user.subscriptionStatus = dbUser.subscriptionStatus ?? undefined;
           session.user.currentPeriodEnd = dbUser.currentPeriodEnd ?? undefined;
@@ -37,6 +41,19 @@ export const authOptions: NextAuthOptions = {
         }
       }
       return session;
+    },
+  },
+  events: {
+    async createUser({ user }) {
+      // Basic invite code generation: FF-XXXX
+      const inviteCode = `FF-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { 
+          inviteCode,
+          role: "BOSS" // Default new users to BOSS so they can start adding files (will be "Free" until pay)
+        },
+      });
     },
   },
   pages: {

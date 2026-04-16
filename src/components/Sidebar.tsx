@@ -10,9 +10,14 @@ import {
   CreditCard, 
   ChevronLeft, 
   ChevronRight,
-  Sparkles
+  Sparkles,
+  Settings,
+  ShieldCheck,
+  Moon,
+  Sun
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTheme } from "next-themes";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -26,31 +31,38 @@ const NAV_ITEMS = [
   {
     href: "/dashboard",
     label: "Dashboard",
-    roles: ["BOSS", "MANAGER", "STAFF", "admin"],
+    roles: ["BOSS", "MANAGER", "STAFF"],
     icon: LayoutDashboard,
   },
   {
-    href: "/admin",
-    label: "Team & Admin",
-    roles: ["BOSS", "MANAGER", "admin"],
+    href: "/team",
+    label: "Team Management",
+    roles: ["BOSS", "MANAGER"],
     icon: Users,
+  },
+  {
+    href: "/billing",
+    label: "Billing & Plans",
+    roles: ["BOSS"],
+    icon: CreditCard,
   },
   {
     href: "/profile",
     label: "My Profile",
-    roles: ["BOSS", "MANAGER", "STAFF", "admin"],
+    roles: ["BOSS", "MANAGER", "STAFF"],
     icon: UserCircle,
   },
   {
-    href: "/pricing",
-    label: "Billing & Plans",
-    roles: ["BOSS", "MANAGER", "STAFF", "admin"],
-    icon: CreditCard,
+    href: "/settings",
+    label: "Settings",
+    roles: ["BOSS", "MANAGER", "STAFF"],
+    icon: Settings,
   },
 ];
 
 export default function Sidebar({ isOpen, isCollapsed, onToggleCollapse, onClose, role }: SidebarProps) {
   const pathname = usePathname();
+  const { theme, setTheme } = useTheme();
   const visibleLinks = NAV_ITEMS.filter((l) => l.roles.includes(role));
 
   return (
@@ -62,7 +74,7 @@ export default function Sidebar({ isOpen, isCollapsed, onToggleCollapse, onClose
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 lg:hidden"
+            className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[60] lg:hidden"
             onClick={onClose}
           />
         )}
@@ -71,47 +83,47 @@ export default function Sidebar({ isOpen, isCollapsed, onToggleCollapse, onClose
       <motion.aside
         initial={false}
         animate={{ 
-          width: isCollapsed ? 80 : 260,
-          translateX: isOpen ? 0 : (typeof window !== 'undefined' && window.innerWidth < 1024 ? -260 : 0)
+          width: isCollapsed ? 84 : 280,
+          translateX: isOpen ? 0 : (typeof window !== 'undefined' && window.innerWidth < 1024 ? -280 : 0)
         }}
         className={`
-          fixed lg:sticky top-0 left-0 z-50 h-dvh shadow-2xl lg:shadow-none
+          fixed lg:sticky top-0 left-0 z-[70] h-dvh shadow-2xl lg:shadow-none
           bg-white dark:bg-zinc-950
-          border-r border-slate-100 dark:border-zinc-800/80
-          flex flex-col overflow-hidden
+          border-r border-slate-200 dark:border-zinc-800/80
+          flex flex-col overflow-hidden transition-colors duration-300
         `}
       >
-        {/* ── Header / Logo ─────────────────────────────────── */}
-        <div className="flex items-center justify-between px-5 h-[68px] shrink-0 border-b border-slate-100 dark:border-zinc-800/80">
-          <Link href="/" className="flex items-center gap-3 overflow-hidden">
-            <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/30 shrink-0">
-               <img src="/logo.png" alt="F" className="w-5 h-5 object-contain" />
+        {/* ── Sidebar Header ────────────────────────────────── */}
+        <div className="flex items-center justify-between px-6 h-[68px] shrink-0 border-b border-slate-100 dark:border-zinc-900/50">
+          <Link href="/dashboard" className="flex items-center gap-3.5 overflow-hidden">
+            <div className="w-9 h-9 rounded-2xl bg-indigo-600 flex items-center justify-center shadow-xl shadow-indigo-600/30 shrink-0">
+               <img src="/logo.png" alt="F" className="w-5.5 h-5.5 object-contain" />
             </div>
             {!isCollapsed && (
               <motion.div 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
                 className="whitespace-nowrap"
               >
-                <p className="text-[15px] font-extrabold tracking-tight text-slate-900 dark:text-white leading-none">FileFinder</p>
-                <p className="text-[10px] text-blue-500 font-bold mt-0.5">PRO SaaS</p>
+                <p className="text-[16px] font-black tracking-tight text-slate-900 dark:text-white leading-none">FileFinder</p>
+                <p className="text-[10px] text-indigo-500 font-bold mt-1 uppercase tracking-widest">SaaS Cloud</p>
               </motion.div>
             )}
           </Link>
           
           <button 
             onClick={onToggleCollapse}
-            className="hidden lg:flex p-1.5 rounded-lg border border-border bg-muted/50 text-muted-foreground hover:text-foreground transition-colors"
+            className="hidden lg:flex p-1.5 rounded-xl border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900 text-slate-400 hover:text-indigo-600 transition-all active:scale-90"
           >
             {isCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
           </button>
         </div>
 
-        {/* ── Nav ──────────────────────────────────────────── */}
-        <nav className="flex-1 overflow-y-auto px-3 py-5 space-y-1 custom-scrollbar">
+        {/* ── Main Navigation ──────────────────────────────── */}
+        <nav className="flex-1 overflow-y-auto px-4 py-8 space-y-1.5 scrollbar-none">
           {!isCollapsed && (
-            <p className="px-3 pb-3 text-[10px] font-extrabold uppercase tracking-[0.12em] text-slate-400 dark:text-zinc-600">
-              Navigation
+            <p className="px-4 pb-4 text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-zinc-600">
+              Menu
             </p>
           )}
           {visibleLinks.map((link) => {
@@ -124,20 +136,20 @@ export default function Sidebar({ isOpen, isCollapsed, onToggleCollapse, onClose
                 href={link.href}
                 onClick={onClose}
                 className={`
-                  flex items-center gap-3.5 px-3.5 py-3 rounded-xl text-[13.5px] font-semibold
-                  transition-all duration-200 group relative
+                  flex items-center gap-4 px-4 py-3.5 rounded-2xl text-[14px] font-bold
+                  transition-all duration-300 group relative overflow-hidden
                   ${isActive
-                    ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25"
-                    : "text-slate-600 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-zinc-900 hover:text-foreground"
+                    ? "bg-indigo-600 text-white shadow-xl shadow-indigo-600/25"
+                    : "text-slate-600 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-zinc-900 hover:text-indigo-600"
                   }
                 `}
               >
-                <span className={`shrink-0 transition-transform duration-200 group-hover:scale-110 ${isActive ? "text-white" : "text-slate-400 dark:text-zinc-500 group-hover:text-primary"}`}>
-                  <Icon size={isCollapsed ? 22 : 18} />
+                <span className={`shrink-0 transition-transform duration-300 group-hover:scale-110 ${isActive ? "text-white" : "text-slate-400 dark:text-zinc-500 group-hover:text-indigo-600"}`}>
+                  <Icon size={isCollapsed ? 22 : 20} />
                 </span>
                 {!isCollapsed && (
                   <motion.span 
-                    initial={{ opacity: 0, x: -10 }}
+                    initial={{ opacity: 0, x: -5 }}
                     animate={{ opacity: 1, x: 0 }}
                   >
                     {link.label}
@@ -145,15 +157,14 @@ export default function Sidebar({ isOpen, isCollapsed, onToggleCollapse, onClose
                 )}
                 
                 {isActive && !isCollapsed && (
-                  <motion.span 
-                    layoutId="active-pill"
-                    className="ml-auto w-1.5 h-1.5 bg-white bg-opacity-70 rounded-full" 
+                  <motion.div 
+                    layoutId="sidebar-active"
+                    className="ml-auto w-1.5 h-1.5 bg-white rounded-full shadow-glow" 
                   />
                 )}
                 
-                {/* Tooltip for collapsed mode */}
                 {isCollapsed && (
-                  <div className="absolute left-full ml-4 px-3 py-1 bg-zinc-900 text-white text-[10px] font-bold rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
+                  <div className="absolute left-[calc(100%+16px)] top-1/2 -translate-y-1/2 px-3 py-1.5 bg-zinc-900 text-white text-[10px] font-bold rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-all translate-x-1 group-hover:translate-x-0 whitespace-nowrap z-[100] border border-white/10 shadow-2xl">
                     {link.label}
                   </div>
                 )}
@@ -162,28 +173,47 @@ export default function Sidebar({ isOpen, isCollapsed, onToggleCollapse, onClose
           })}
         </nav>
 
-        {/* ── Pro Badge / Footer ─────────────────────────────── */}
-        <div className="p-3">
-          <div className={`rounded-2xl bg-gradient-to-br from-indigo-500/10 to-blue-500/10 border border-indigo-500/20 p-3 relative overflow-hidden group`}>
-             <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-30 transition-opacity">
-               <Sparkles size={24} className="text-indigo-500" />
-             </div>
-             <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-indigo-600 flex items-center justify-center text-white text-xs font-black shadow-lg">
-                  DB
-                </div>
-                {!isCollapsed && (
-                   <motion.div 
-                     initial={{ opacity: 0 }}
-                     animate={{ opacity: 1 }}
-                     className="min-w-0"
-                   >
-                     <p className="text-xs font-bold text-foreground truncate">Demo Admin</p>
-                     <p className="text-[10px] text-blue-500 font-bold uppercase tracking-wider">BOSS</p>
-                   </motion.div>
-                )}
-             </div>
+        {/* ── Sidebar Footer: Theme & Profile ────────────────── */}
+        <div className="p-4 border-t border-slate-100 dark:border-zinc-900/50 bg-slate-50/50 dark:bg-zinc-900/20">
+          
+          {/* Night Mode Switcher */}
+          <div className={`mb-4 flex items-center justify-between p-2 rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 gap-1`}>
+             <button 
+               onClick={() => setTheme('light')}
+               className={`flex-1 flex items-center justify-center p-2 rounded-xl transition-all ${theme === 'light' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'text-slate-400 hover:bg-slate-100'}`}
+             >
+               <Sun size={16} />
+             </button>
+             <button 
+               onClick={() => setTheme('dark')}
+               className={`flex-1 flex items-center justify-center p-2 rounded-xl transition-all ${theme === 'dark' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'text-slate-400 hover:bg-zinc-800'}`}
+             >
+               <Moon size={16} />
+             </button>
           </div>
+
+          {!isCollapsed ? (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="rounded-2xl bg-gradient-to-br from-indigo-600 to-blue-700 p-4 relative overflow-hidden group shadow-xl shadow-indigo-600/20"
+            >
+              <div className="absolute top-0 right-0 p-3 opacity-20 rotate-12 group-hover:scale-125 transition-transform duration-500">
+                <ShieldCheck size={40} className="text-white" />
+              </div>
+              <p className="text-[10px] font-black text-indigo-200 uppercase tracking-widest mb-1">Status</p>
+              <p className="text-sm font-black text-white flex items-center gap-1.5">
+                Pro Account
+                <Sparkles size={12} className="text-amber-300 animate-pulse" />
+              </p>
+            </motion.div>
+          ) : (
+            <div className="flex items-center justify-center">
+               <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-lg">
+                  <ShieldCheck size={20} />
+               </div>
+            </div>
+          )}
         </div>
       </motion.aside>
     </>
