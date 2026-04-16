@@ -56,7 +56,7 @@ const containerVariants = {
       staggerChildren: 0.1,
     },
   },
-};
+} as const;
 
 const itemVariants = {
   hidden: { y: 20, opacity: 0 },
@@ -68,7 +68,7 @@ const itemVariants = {
       stiffness: 100,
     },
   },
-};
+} as const;
 
 export default function LandingPage() {
   return (
