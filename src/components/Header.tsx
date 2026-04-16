@@ -4,7 +4,7 @@ import { useLang } from "@/contexts/LanguageContext";
 import { LANGUAGES, Language } from "@/lib/i18n";
 import { useState } from "react";
 import Link from "next/link";
-import { useSession, signOut } from "next-auth/react";
+import { useSession, signIn, signOut } from "next-auth/react";
 import Image from "next/image";
 import { Globe, Menu, User, LogOut, ChevronDown } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
@@ -19,7 +19,7 @@ export default function Header({ onOpenSidebar }: { onOpenSidebar?: () => void }
   const isLoading = status === "loading";
 
   return (
-    <header className="sticky top-0 z-30 glass border-b">
+    <header className="sticky top-0 z-50 glass border-b">
       <div className="flex items-center justify-between h-[68px] px-4 sm:px-6 lg:px-8">
 
         {/* ── Left ─────────────────────────────────────────── */}
@@ -163,18 +163,20 @@ export default function Header({ onOpenSidebar }: { onOpenSidebar?: () => void }
             </div>
           ) : (
             <div className="flex items-center gap-3">
-              <Link
-                href="/dashboard"
+              <button
+                onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
                 className="hidden sm:block text-sm font-bold text-slate-600 dark:text-zinc-400 hover:text-indigo-600 transition-colors"
+                id="login-button"
               >
                 Login
-              </Link>
-              <Link
-                href="/dashboard"
+              </button>
+              <button
+                onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
                 className="px-5 py-2.5 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold shadow-lg shadow-indigo-500/25 active:scale-95 transition-all"
+                id="signup-button"
               >
                 Sign Up
-              </Link>
+              </button>
             </div>
           )}
         </div>
